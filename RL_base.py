@@ -26,7 +26,7 @@ class RL_base():
         self.discount_factor = 0.8
         self.exploration_rate = 0.4
 
-        self.num_iterations = 100
+        self.num_iterations = 1000
 
         # debug_mode
         # = 0: no output

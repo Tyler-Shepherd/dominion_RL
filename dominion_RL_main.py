@@ -45,14 +45,11 @@ def test_model(test_output_file, agent, test_kingdoms):
     test_output_file.flush()
 
 
-# After how many profiles to test the model
+# After how many kingdoms to test the model
 test_every = 25
 
 # Whether or not to test before any training
 test_at_start = 1
-
-# Number of iterations to use when testing
-num_test_iterations = 10
 
 
 if __name__ == '__main__':
@@ -63,8 +60,8 @@ if __name__ == '__main__':
     random.seed(time.time())
     torch.manual_seed(time.time())
 
-    test_filenames = [{0: 30, 1: 30, 2: 30, 3: 8, 4: 8, 5: 8, 6: 0}] * 20
-    filenames = [{0: 30, 1: 30, 2: 30, 3: 8, 4: 8, 5: 8, 6: 0}] * 100
+    test_kingdoms = [{0: 30, 1: 30, 2: 30, 3: 8, 4: 8, 5: 8, 6: 0}] * 200
+    train_kingdoms = [{0: 30, 1: 30, 2: 30, 3: 8, 4: 8, 5: 8, 6: 0}] * 800
 
     # Open files for output
     output_filename = "results/results_" + os.path.basename(__file__)
@@ -80,7 +77,6 @@ if __name__ == '__main__':
     test_output_file = open(test_output_filename, "w+")
     parameters_file = open(parameters_output_filename, "w+")
 
-    num_profiles = 0
     total_time = 0
 
     total_num_turns = 0
@@ -89,7 +85,7 @@ if __name__ == '__main__':
     i = 0
 
     # Print header
-    header = "Inputfile\tTurns\tRuntime"
+    header = "Kingdom\tTurns\tRuntime"
     print(header)
     output_file.write(header+'\n')
 
@@ -100,9 +96,9 @@ if __name__ == '__main__':
     # parameters_file.write("Test\t" + str(len(test_filenames)) + '\n')
     # parameters_file.write("Num Iterations per Profile\t" + MechanismRankedPairs().num_iterations + '\n')
 
-    for kingdom in filenames:
+    for kingdom in train_kingdoms:
         if i % test_every == 0 and (test_at_start or i != 0):
-           test_model(test_output_file, agent, test_filenames)
+           test_model(test_output_file, agent, test_kingdoms)
 
         # Run the agent
         start = time.perf_counter()
@@ -110,9 +106,8 @@ if __name__ == '__main__':
         end = time.perf_counter()
 
         total_time += (end - start)
-        num_profiles += 1
 
-        result_text = "%s\t%f" % (str(kingdom), end - start)
+        result_text = "%s\t%d\t%f" % (str(kingdom), agent.turn_num, end - start)
         print(i, result_text)
         output_file.write(result_text + '\n')
         output_file.flush()
@@ -127,7 +122,7 @@ if __name__ == '__main__':
         i += 1
 
     # Final test
-    test_model(test_output_file, agent, test_filenames)
+    test_model(test_output_file, agent, test_kingdoms)
 
     # Close files
     output_file.close()
@@ -137,4 +132,4 @@ if __name__ == '__main__':
     parameters_file.close()
 
     print("Total Time to Train: %f" % total_time)
-    print("Average Time: %f" % (total_time / num_profiles))
+    print("Average Time: %f" % (total_time / len(train_kingdoms)))

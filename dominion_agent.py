@@ -216,6 +216,9 @@ class dominion_agent():
         self.trash = []
         self.turn_num = 1
 
+        # Draw initial hand
+        self.player.clean_up()
+
     '''
     Returns -1 if not at goal state (game not over)
     Returns 1 if game is over (no provinces)
