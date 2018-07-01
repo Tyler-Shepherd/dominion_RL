@@ -184,14 +184,14 @@ class dominion_agent():
     def __init__(self):
         # Initialize learning model
 
-        D_in = 5  # input dimension
-        H = 3  # hidden dimension
-        D_out = 1  # output dimension, just want q value
+        self.D_in = 5  # input dimension
+        self.H = 3  # hidden dimension
+        self.D_out = 1  # output dimension, just want q value
 
         self.model = torch.nn.Sequential(
-            torch.nn.Linear(D_in, H),
+            torch.nn.Linear(self.D_in, self.H),
             torch.nn.Sigmoid(),
-            torch.nn.Linear(H, D_out)
+            torch.nn.Linear(self.H, self.D_out)
         )
 
         self.loss_fn = torch.nn.MSELoss(size_average=False)  # using mean squared error

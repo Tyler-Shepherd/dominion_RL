@@ -6,7 +6,6 @@ import numpy as np
 from numpy import *
 from numpy import linalg as LA
 import itertools
-from profile import Profile
 import copy
 import sys
 import networkx as nx
@@ -18,6 +17,7 @@ from torch.autograd import Variable
 import random
 from pprint import pprint
 import glob
+import datetime
 
 from RL_base import RL_base
 from dominion_agent import dominion_agent
@@ -30,6 +30,8 @@ def test_model(test_output_file, agent, test_kingdoms):
     num_total_vp = 0
     j = 0
 
+    test_output_file.write("Num Trained\tTotal Num Turns\tAvg Num Turns\tTotal VP\tAvg VP\n")
+
     for test_kingdom in test_kingdoms:
         print("Testing", test_kingdom)
 
@@ -40,8 +42,11 @@ def test_model(test_output_file, agent, test_kingdoms):
 
         j += 1
 
-    print("Test took average of", num_total_turns / len(test_kingdoms), "turns with avg VP score of", num_total_vp / len(test_kingdoms))
-    test_output_file.write(str(i) + "\t" + str(num_total_turns) + "\n")
+    avg_num_turns = num_total_turns / len(test_kingdoms)
+    avg_vp = num_total_vp / len(test_kingdoms)
+
+    print("Test took average of", avg_num_turns, "turns with avg VP score of", avg_vp)
+    test_output_file.write(str(i) + "\t" + str(num_total_turns) + "\t" + str(avg_num_turns) + "\t" + str(num_total_vp) + "\t" + str(avg_vp) + "\n")
     test_output_file.flush()
 
 
@@ -90,11 +95,29 @@ if __name__ == '__main__':
     output_file.write(header+'\n')
 
     # Print parameters
-    # TODO
-    # parameters_file.write("Data Path\t" + rpconfig.path + '\n')
-    # parameters_file.write("Train\t" + str(len(filenames)) + '\n')
-    # parameters_file.write("Test\t" + str(len(test_filenames)) + '\n')
-    # parameters_file.write("Num Iterations per Profile\t" + MechanismRankedPairs().num_iterations + '\n')
+    parameters_file.write("Num Training Data\t" + str(len(train_kingdoms)) + '\n')
+    parameters_file.write("Num Testing Data\t" + str(len(test_kingdoms)) + '\n')
+    parameters_file.write("Learning Rate\t" + str(base.learning_rate) + '\n')
+    parameters_file.write("Discount Factor\t" + str(base.discount_factor) + '\n')
+    parameters_file.write("Exploration Rate\t" + str(base.exploration_rate) + '\n')
+    parameters_file.write("Num Iterations per Profile\t" + str(base.num_iterations) + '\n')
+    parameters_file.write("Agent D_in\t" + str(agent.D_in) + '\n')
+    parameters_file.write("Agent H\t" + str(agent.H) + '\n')
+    parameters_file.write("Agent D_out\t" + str(agent.D_out) + '\n')
+    parameters_file.write("Agent Model\t" + str(agent.model) + '\n')
+    parameters_file.write("Agent Loss Function\t" + str(agent.loss_fn) + '\n')
+    parameters_file.write("Date\t" + str(datetime.datetime.now()) + '\n')
+
+    # print training and test kingdoms used
+    parameters_file.write("\nTraining Kingdoms\n")
+    for kingdom in train_kingdoms:
+        parameters_file.write(str(kingdom) + "\n")
+
+    parameters_file.write("\nTest Kingdoms\n")
+    for kingdom in test_kingdoms:
+        parameters_file.write(str(kingdom) + "\n")
+
+    parameters_file.flush()
 
     for kingdom in train_kingdoms:
         if i % test_every == 0 and (test_at_start or i != 0):
