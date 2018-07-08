@@ -30,11 +30,9 @@ def test_model(test_output_file, agent, test_kingdoms):
     num_total_vp = 0
     j = 0
 
-    test_output_file.write("Num Trained\tTotal Num Turns\tAvg Num Turns\tTotal VP\tAvg VP\n")
+    print("starting test")
 
     for test_kingdom in test_kingdoms:
-        print("Testing", test_kingdom)
-
         test_num_turns, test_vp = agent.test_model(test_kingdom)
 
         num_total_turns += test_num_turns
@@ -51,10 +49,10 @@ def test_model(test_output_file, agent, test_kingdoms):
 
 
 # After how many kingdoms to test the model
-test_every = 25
+test_every = 2500
 
 # Whether or not to test before any training
-test_at_start = 1
+test_at_start = 0
 
 
 if __name__ == '__main__':
@@ -65,8 +63,8 @@ if __name__ == '__main__':
     random.seed(time.time())
     torch.manual_seed(time.time())
 
-    test_kingdoms = [{0: 30, 1: 30, 2: 30, 3: 8, 4: 8, 5: 8, 6: 0}] * 200
-    train_kingdoms = [{0: 30, 1: 30, 2: 30, 3: 8, 4: 8, 5: 8, 6: 0}] * 800
+    test_kingdoms = [{0: 30, 1: 30, 2: 30, 3: 8, 4: 8, 5: 8, 6: 0}] * 20000
+    train_kingdoms = [{0: 30, 1: 30, 2: 30, 3: 8, 4: 8, 5: 8, 6: 0}] * 80000
 
     # Open files for output
     output_filename = "results/results_" + os.path.basename(__file__)
@@ -90,7 +88,7 @@ if __name__ == '__main__':
     i = 0
 
     # Print header
-    header = "Kingdom\tTurns\tRuntime"
+    header = "Kingdom\tTurns\tPlayer Won\tOpponent VP\tPlayer VP\tRuntime"
     print(header)
     output_file.write(header+'\n')
 
@@ -119,6 +117,8 @@ if __name__ == '__main__':
 
     parameters_file.flush()
 
+    test_output_file.write("Num Trained\tTotal Num Turns\tAvg Num Turns\tTotal VP\tAvg VP\n")
+
     for kingdom in train_kingdoms:
         if i % test_every == 0 and (test_at_start or i != 0):
            test_model(test_output_file, agent, test_kingdoms)
@@ -130,7 +130,10 @@ if __name__ == '__main__':
 
         total_time += (end - start)
 
-        result_text = "%s\t%d\t%f" % (str(kingdom), agent.turn_num, end - start)
+        player_vp = agent.player.num_victory_points()
+        opp_vp = agent.opponent.player.num_victory_points()
+
+        result_text = "%s\t%d\t%d\t%d\t%d\t%f" % (str(kingdom), agent.turn_num, player_vp > opp_vp, opp_vp, player_vp, end - start)
         print(i, result_text)
         output_file.write(result_text + '\n')
         output_file.flush()
