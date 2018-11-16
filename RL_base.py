@@ -15,25 +15,14 @@ import random
 from pprint import pprint
 import glob
 
+import params as params
+
 # Base functions and training environment for RL
 
 class RL_base():
 
     def __init__(self):
-        # Tunable learning parameters
-        self.learning_rate = 0.04
-        self.discount_factor = 0.8
-        self.exploration_rate = 0.4
-
-        self.num_iterations = 1
-
-        # debug_mode
-        # = 0: no output
-        # = 1: outputs only initial state
-        # = 2: outputs on stop conditions
-        # = 3: outputs all data
-        self.debug_mode = 0
-
+        pass
 
     '''
     Main reinforcement learning loop
@@ -44,7 +33,7 @@ class RL_base():
         # Initialize
         agent.initialize(env0)
 
-        for iter in range(self.num_iterations):
+        for iter in range(params.num_training_iterations):
             # Reset environment
             agent.reset_environment()
 
@@ -52,23 +41,23 @@ class RL_base():
             while agent.at_goal_state() == -1:
                 legal_actions = agent.get_legal_actions()
 
-                if self.debug_mode >= 2:
-                    print("start")
+                if params.debug_mode >= 3:
                     agent.print_state()
-                    print("legal actions:", legal_actions)
+                    print("legal actions:", [c.name for c in legal_actions])
 
                 if len(legal_actions) == 0:
                     # No possible actions
-                    if self.debug_mode >= 2:
-                        print("no legal actions")
+                    if params.debug_mode >= 2:
+                        print("no purchaseable cards")
+                    # TODO what should happen in this case?
                     break
 
-                if random.random() < self.exploration_rate:
+                if random.random() < params.exploration_rate:
                     # Randomly select a possible action with probability epsilon
                     i = random.randint(0, len(legal_actions) - 1)
                     a = legal_actions[i]
-                    if self.debug_mode >= 2:
-                        print("randomly select action", a)
+                    if params.debug_mode >= 3:
+                        print("randomly select action", a.name)
                 else:
                     # Otherwise greedily choose best action
                     max_action = None
@@ -80,19 +69,15 @@ class RL_base():
                             max_action_val = action_Q_val
 
                     a = max_action
-                    if self.debug_mode >= 2:
-                        print("greedily select action", a, "with q val", max_action_val)
+                    if params.debug_mode >= 3:
+                        print("greedily select action", a.name, "with q val", max_action_val.item())
+
+                assert a is not None
 
                 # Take the action and update q vals
                 self.update_q(agent, a)
 
-            # Reached goal state
-            agent.goal_state_update()
-
-        if self.debug_mode >= 2:
-            agent.print_model()
-
-        return agent  #, stats
+        return agent
 
 
     def update_q(self, agent, a):
@@ -104,18 +89,19 @@ class RL_base():
         # Gets reward of current (now updated) state
         new_reward = agent.reward()
 
-        # Get the maximum estimated q value of all possible actions after adding a
+        # Get the maximum estimated q value of all possible actions after buying a
         max_next_q_val = float("-inf")
         next_legal_actions = agent.get_legal_actions()
 
         if len(next_legal_actions) == 0:
             # If there are no legal next actions, then we've reached a goal state
             # Estimate of next state is just 0 (since there is no next state)
+            # TODO what does this mean
             max_next_q_val = 0
 
         for e in next_legal_actions:
             max_next_q_val = max(max_next_q_val, agent.get_Q_val(e))
 
-        new_q_value = new_reward + self.discount_factor * max_next_q_val
+        new_q_value = new_reward + params.discount_factor * max_next_q_val
 
-        agent.update_q(self.learning_rate, old_q_value, new_q_value)
+        agent.update_q(params.learning_rate, old_q_value, new_q_value)

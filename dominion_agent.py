@@ -21,29 +21,26 @@ import glob
 
 from player import Player
 from card import Card
+import params as params
 
 sys.path.append("./opponents")
 from buy_only_treasure import Buy_Only_Treasure_Opponent
 
-debug_mode = 0
-
 class dominion_agent():
-    def __init__(self):
+    def __init__(self, loss_output_file):
         # Initialize learning model
 
-        self.D_in = 5  # input dimension
-        self.H = 3  # hidden dimension
-        self.D_out = 1  # output dimension, just want q value
-
         self.model = torch.nn.Sequential(
-            torch.nn.Linear(self.D_in, self.H),
+            torch.nn.Linear(params.D_in, params.H),
             torch.nn.Sigmoid(),
-            torch.nn.Linear(self.H, self.D_out)
+            torch.nn.Linear(params.H, params.D_out)
         )
 
-        self.loss_fn = torch.nn.MSELoss(size_average=False)  # using mean squared error
+        self.running_loss = 0
+        self.running_states = 0
+        self.loss_output_file = loss_output_file
 
-        self.turn_num = 1
+        self.loss_fn = torch.nn.MSELoss(size_average=False)  # using mean squared error
 
     '''
     Initializes environment for an iteration of learning
@@ -52,10 +49,9 @@ class dominion_agent():
     '''
     def initialize(self, env0):
         self.kingdom_0 = env0.copy()
-        self.turn_num = 1
 
     '''
-    Resets G (the current RP graph), E (the graph of unadded edges) and K (the known winners)
+    Resets game to beginning
     '''
     def reset_environment(self):
         self.kingdom = self.kingdom_0.copy()
@@ -67,6 +63,10 @@ class dominion_agent():
 
         # Draw initial hand
         self.player.clean_up()
+        self.opponent.player.clean_up()
+
+        if params.debug_mode >= 3:
+            print("Turn", self.turn_num)
 
     '''
     Returns -1 if not at goal state (game not over)
@@ -92,8 +92,8 @@ class dominion_agent():
     '''
     def get_legal_actions(self):
         coins = self.player.num_coins()
-        if debug_mode >= 2:
-            print("has", coins, "coins")
+        if params.debug_mode >= 2:
+            print("Agent has", coins, "coins")
 
         cards_purchasable = []
 
@@ -125,7 +125,7 @@ class dominion_agent():
 
     # Returns input layer features at current state buying Card a
     def state_features(self, a):
-        # ideas: num remaining of each card in kingdom, num of each card in deck
+        # ideas: num remaining of each card in kingdom, num of each card in deck, opponent features
 
         f = []
         f.append(self.player.num_coins())
@@ -133,6 +133,7 @@ class dominion_agent():
         f.append(2 * int(a.f_victory) - 1)
         f.append(2 * int(a.f_treasure) - 1)
         f.append(2 * int(a.f_action) - 1)
+        f.append(self.turn_num)
 
         # for c in self.kingdom.keys():
         #     f.append(self.kingdom[c])
@@ -143,34 +144,39 @@ class dominion_agent():
         state_features = self.state_features(a)
         return self.model(state_features)
 
-    # Doesn't need to do anything
-    def goal_state_update(self):
-        pass
-
-    def print_model(self, output_file):
-        for p in self.model.parameters():
-            print(p)
-
     '''
     Buys card a, has opponent play out turn then purchase, then plays out next turn for this player
     '''
-    def make_move(self, a):
+    def make_move(self, a, f_testing = False):
         if a is not None:
-            if debug_mode >= 2:
-                print("buying", a.name)
+            if params.debug_mode >= 2:
+                print("Agent buying", a.name)
 
-            self.player.hand.append(a)
+            self.player.discard.append(a)
             self.kingdom[a.id] -= 1
 
         self.player.clean_up()
 
-        self.opponent.action_phase(debug_mode)
-        self.opponent.buy_phase(debug_mode)
+        self.opponent.action_phase()
+        self.opponent.buy_phase()
+        self.opponent.player.clean_up()
+
+        # TODO what if the game ends here?
 
         self.turn_num += 1
-        if debug_mode >= 3:
+        if params.debug_mode >= 3:
             print("Turn", self.turn_num)
         self.player.action_phase()
+
+        if not f_testing:
+            self.running_states += 1
+
+            if self.running_states % params.print_loss_every == 0:
+                print("*******LOSS:", self.running_loss / params.print_loss_every)
+                self.loss_output_file.write(str(self.running_states) + '\t' + str(self.running_loss / params.print_loss_every) + '\n')
+                self.loss_output_file.flush()
+
+                self.running_loss = 0
 
     # num victory points owned or num turns in?
     def reward(self):
@@ -192,6 +198,8 @@ class dominion_agent():
         # Compute loss
         loss = self.loss_fn(old_q_value, new_q_value)
 
+        self.running_loss += loss.item()
+
         # Zero the gradients before running the backward pass.
         self.model.zero_grad()
 
@@ -206,32 +214,40 @@ class dominion_agent():
             for param in self.model.parameters():
                 param -= learning_rate * param.grad
 
-    # Play num_iterations games on kingdom test_env, record num turns to win
+    '''
+    Plays a single game on test_env
+    Returns whether won, number of turns, number of VP of player, number of VP of opponent
+    '''
     def test_model(self, test_env):
-        # Save the model
-        torch.save(self.model.state_dict(), "checkpoint.pth.tar")
-
         self.initialize(test_env)
-
-        # Play using model greedily
         self.reset_environment()
 
-        while self.at_goal_state() == -1:
-            legal_actions = self.get_legal_actions()
+        # Play using model greedily
+        with torch.no_grad():
+            while self.at_goal_state() == -1:
+                legal_actions = self.get_legal_actions()
 
-            max_action = None
-            max_action_val = float("-inf")
-            for e in legal_actions:
-                action_val = self.get_Q_val(e)
+                max_action = None
+                max_action_val = float("-inf")
+                for e in legal_actions:
+                    action_val = self.get_Q_val(e)
 
-                if action_val > max_action_val:
-                    max_action = e
-                    max_action_val = action_val
+                    if action_val > max_action_val:
+                        max_action = e
+                        max_action_val = action_val
 
-            self.make_move(max_action)
+                self.make_move(max_action, f_testing=True)
 
-        return self.turn_num, self.player.num_victory_points()
+        player_vp = self.player.num_victory_points()
+        opp_vp = self.opponent.player.num_victory_points()
+
+        return player_vp > opp_vp, self.turn_num, player_vp, opp_vp
+
+    def save_model(self, checkpoint_filename):
+        torch.save(self.model.state_dict(), checkpoint_filename)
+        print("Saved model to " + checkpoint_filename)
 
     def load_model(self, checkpoint_filename):
         checkpoint = torch.load(checkpoint_filename)
         self.model.load_state_dict(checkpoint)
+        print("Loaded model from " + checkpoint_filename)

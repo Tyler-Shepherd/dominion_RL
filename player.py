@@ -1,6 +1,7 @@
 import random
 
 from card import Card
+import params as params
 
 class Player:
     # Stores current state of player
@@ -46,6 +47,9 @@ class Player:
             self.hand.remove(card_to_play)
             card_to_play.play(self)
             actions_remaining -= 1
+
+            if params.debug_mode >= 2:
+                print("Playing", card_to_play.name)
 
     def num_coins(self):
         coins = sum(card.coin_value for card in self.hand if card.f_treasure)
