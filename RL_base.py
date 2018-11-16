@@ -11,7 +11,6 @@ import networkx as nx
 from collections import defaultdict
 import matplotlib.pyplot as plt
 from queue import PriorityQueue
-import tensorflow as tf
 import random
 from pprint import pprint
 import glob

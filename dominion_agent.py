@@ -79,7 +79,7 @@ class dominion_agent():
 
         num_empty = 0
         for c in self.kingdom.keys():
-            if self.kingdom[c] == 0:
+            if self.kingdom[c] == 0 and self.kingdom_0[c] != 0:
                 num_empty += 1
 
         if num_empty >= 3:

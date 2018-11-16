@@ -24,10 +24,11 @@ from dominion_agent import dominion_agent
 
 if __name__ == '__main__':
 
-    kingdom = {0: 30, 1: 30, 2: 30, 3: 8, 4: 8, 5: 8, 6: 0}
+    # kingdom = {0: 30, 1: 30, 2: 30, 3: 8, 4: 8, 5: 8, 6: 0}
+    kingdom = {0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 8, 6: 0}
 
     agent = dominion_agent()
-    agent.load_model("C:\\Users\shepht2\Documents\Computer Science\\Dominion\\checkpoint.pth.tar")
+    agent.load_model("C:\\Users\shepht2\Documents\Computer Science\\Dominion\\dominion_RL\\checkpoint.pth.tar")
     agent.initialize(kingdom)
     agent.reset_environment()
 
