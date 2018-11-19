@@ -38,7 +38,7 @@ class Buy_Only_Treasure_Opponent:
             if params.debug_mode >= 2:
                 print("Opponent purchasing Silver")
         elif params.debug_mode >= 2:
-            print("Opponent purchasing nothing")
+            print("Opponent purchasing Nothing")
 
 
 

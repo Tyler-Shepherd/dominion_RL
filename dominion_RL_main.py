@@ -24,7 +24,7 @@ from dominion_agent import dominion_agent
 import params as params
 
 
-def test_model(test_output_file, agent, test_kingdoms, num_times_tested, val_testing):
+def test_model(test_output_file, test_output_full_file, agent, test_kingdoms, num_times_tested, val_testing):
     # Test the agents learned model
 
     num_won = 0
@@ -33,14 +33,15 @@ def test_model(test_output_file, agent, test_kingdoms, num_times_tested, val_tes
     num_total_opp_vp = 0
     j = 0
 
-    # TODO is_val, num_times_tested
+    test_output_full_file.write("**************Test " + str(num_times_tested) + '\n')
+
     if val_testing:
         print("---------------Validation " + str(num_times_tested) + "--------------")
     else:
         print("---------------Test " + str(num_times_tested) + "----------------")
 
     for test_kingdom in test_kingdoms:
-        player_won, test_num_turns, player_vp, opp_vp = agent.test_model(test_kingdom)
+        player_won, test_num_turns, player_vp, opp_vp = agent.test_model(test_kingdom, test_output_full_file)
 
         num_won += player_won
         num_total_turns += test_num_turns
@@ -82,11 +83,15 @@ if __name__ == '__main__':
     output_filename = "results/" + str(model_id) + '_training.txt'
     loss_filename = "results/" + str(model_id) + "_loss.txt"
     test_output_filename = "results/" + str(model_id) + "_test.txt"
+    test_output_full_filename = "results/" + str(model_id) + "_test_full.txt"
     val_output_filename = "results/" + str(model_id) + "_val.txt"
+    val_output_full_filename = "results/" + str(model_id) + "_val_full.txt"
     output_file = open(output_filename, "w+")
     loss_file = open(loss_filename, "w+")
-    test_output_file = open(test_output_filename, "w+")
+    test_file = open(test_output_filename, "w+")
+    test_full_file = open(test_output_full_filename, "w+")
     val_file = open(val_output_filename, "w+")
+    val_full_file = open(val_output_full_filename, "w+")
 
     loss_file.write('Num States' + '\t' + 'Loss Per State' + '\n')
     loss_file.flush()
@@ -119,10 +124,14 @@ if __name__ == '__main__':
     parameters_file.flush()
 
     test_header = "Num Test\tNum Won\tWin Percent\tNum Total Turns\tAvg Num Turns\tTotal Agent VP\tAvg Agent VP\tTotal Opponent VP\tAvg Opponent VP\n"
-    test_output_file.write(test_header)
+    test_file.write(test_header)
     val_file.write(test_header)
-    test_output_file.flush()
+    test_file.flush()
     val_file.flush()
+
+    test_full_header = "Turn\tCoins\tCard Purchased\n"
+    test_full_file.write(test_full_header)
+    val_full_file.write(test_full_header)
 
     val_results = []
     num_times_tested = 0
@@ -156,7 +165,8 @@ if __name__ == '__main__':
             i += 1
 
         # test on validation data after each epoch
-        num_won = test_model(val_file, agent, val_kingdoms, num_times_tested, True)
+        agent.save_model("results/" + str(model_id) + "_val_" + str(num_times_tested) + '.pth.tar')
+        num_won = test_model(val_file, val_full_file, agent, val_kingdoms, num_times_tested, True)
         val_results.append(num_won)
         num_times_tested += 1
 
@@ -165,17 +175,18 @@ if __name__ == '__main__':
     best_model = np.argmin(val_results)
     print("Best model:", best_model)
 
-    # TODO load best model
-
-    # Final test
+    # load and test best model 10x
+    agent.load_model("results/" +str(model_id) + "_val_" + str(best_model) + '.pth.tar')
     for t in range(10):
-        test_model(test_output_file, agent, test_kingdoms, "final_" + str(t), False)
+        test_model(test_file, test_full_file, agent, test_kingdoms, "final_" + str(t), False)
 
     # Close files
     output_file.close()
     loss_file.close()
-    test_output_file.close()
+    test_file.close()
+    test_full_file.close()
     val_file.close()
+    val_full_file.close()
     parameters_file.close()
 
     print("Total Time to Train: %f" % total_time)

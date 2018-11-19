@@ -36,6 +36,11 @@ class dominion_agent():
             torch.nn.Linear(params.H, params.D_out)
         )
 
+        self.target_model = copy.deepcopy(self.model)
+        for p in self.target_model.parameters():
+            p.requires_grad = False
+        self.target_model.load_state_dict(self.model.state_dict())
+
         self.running_loss = 0
         self.running_states = 0
         self.loss_output_file = loss_output_file
@@ -97,6 +102,9 @@ class dominion_agent():
 
         cards_purchasable = []
 
+        # "skip" card
+        cards_purchasable.append(Card(-1))
+
         for c in self.kingdom.keys():
             card = Card(c)
             if card.cost <= coins and self.kingdom[c] > 0:
@@ -125,7 +133,12 @@ class dominion_agent():
 
     # Returns input layer features at current state buying Card a
     def state_features(self, a):
-        # ideas: num remaining of each card in kingdom, num of each card in deck, opponent features
+        # TODO: num remaining of each card in kingdom, num of each card in deck
+        # num of each card opponent has, opponent vp total
+        # player vp total
+        # opponent - player vp difference
+        # a's id
+        # special for if a is Nothing?
 
         f = []
         f.append(self.player.num_coins())
@@ -135,23 +148,26 @@ class dominion_agent():
         f.append(2 * int(a.f_action) - 1)
         f.append(self.turn_num)
 
-        # for c in self.kingdom.keys():
-        #     f.append(self.kingdom[c])
-
         return Variable(torch.from_numpy(np.array(f)).float())
 
-    def get_Q_val(self, a):
+    def get_Q_val(self, a, use_target_net=False):
         state_features = self.state_features(a)
+
+        if use_target_net:
+            return self.target_model(state_features)
         return self.model(state_features)
 
     '''
-    Buys card a, has opponent play out turn then purchase, then plays out next turn for this player
+    Buys card a, has opponent play out full turn, then plays out next turn's action phase for this player
     '''
     def make_move(self, a, f_testing = False):
-        if a is not None:
-            if params.debug_mode >= 2:
-                print("Agent buying", a.name)
+        assert a is not None
 
+        if params.debug_mode >= 2:
+            print("Agent buying", a.name)
+
+        # unless purchasing nothing, remove card from kingdom
+        if a.id != -1:
             self.player.discard.append(a)
             self.kingdom[a.id] -= 1
 
@@ -178,16 +194,19 @@ class dominion_agent():
 
                 self.running_loss = 0
 
-    # num victory points owned or num turns in?
+    # Reward is the current difference in scores between player and opponent
     def reward(self):
+        # current_state = self.at_goal_state()
+        #
+        # if current_state == -1:
+        #     # Not a goal state
+        #     reward_val =  0
+        # else:
+        #     reward_val = self.player.num_victory_points() - self.turn_num
 
-        current_state = self.at_goal_state()
-
-        if current_state == -1:
-            # Not a goal state
-            reward_val =  0
-        else:
-            reward_val = self.player.num_victory_points() - self.turn_num
+        # doing this might incentive just buying estate early
+        # could try doing this only when at end of game
+        reward_val = self.player.num_victory_points() - self.opponent.player.num_victory_points()
 
         return torch.tensor(reward_val, dtype = torch.float32)
 
@@ -218,9 +237,11 @@ class dominion_agent():
     Plays a single game on test_env
     Returns whether won, number of turns, number of VP of player, number of VP of opponent
     '''
-    def test_model(self, test_env):
+    def test_model(self, test_env, test_output_full_file):
         self.initialize(test_env)
         self.reset_environment()
+
+        test_output_full_file.write(str(test_env) + '\n')
 
         # Play using model greedily
         with torch.no_grad():
@@ -236,7 +257,11 @@ class dominion_agent():
                         max_action = e
                         max_action_val = action_val
 
+                test_output_full_file.write(str(self.turn_num) + '\t' + str(self.player.num_coins()) + '\t' + str(max_action.name) + '\n')
+
                 self.make_move(max_action, f_testing=True)
+
+        test_output_full_file.write('--------------------------------------------\n')
 
         player_vp = self.player.num_victory_points()
         opp_vp = self.opponent.player.num_victory_points()

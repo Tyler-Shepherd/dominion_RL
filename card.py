@@ -26,7 +26,10 @@ class Card:
 
         self.name = ""
 
-        if id == 0:
+        if id == -1:
+            # Special "skip buy" card
+            self.name = "Nothing"
+        elif id == 0:
             # Copper
             self.f_treasure = 1
             self.coin_value = 1
