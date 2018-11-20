@@ -1,12 +1,16 @@
 import datetime
 
-debug_mode = 3
-print_loss_every = 100
+debug_mode = 0
+print_loss_every = 1000
 
-num_epochs = 5
+num_train_kingdoms = 100
+num_test_kingdoms = 10
+num_val_kingdoms = 10
+
+num_epochs = 100000
 num_training_iterations = 1
 
-learning_rate = 0.04
+learning_rate = 0.01
 
 f_learning_rate_decay = 1
 learning_rate_start = 0.9
@@ -31,6 +35,11 @@ D_out = 1
 # Print parameters
 def print_params(parameters_file):
     parameters_file.write("print_loss_every\t" + str(print_loss_every) + '\n')
+
+    parameters_file.write("num_train_kingdoms\t" + str(num_train_kingdoms) + '\n')
+    parameters_file.write("num_test_kingdoms\t" + str(num_test_kingdoms) + '\n')
+    parameters_file.write("num_val_kingdoms\t" + str(num_val_kingdoms) + '\n')
+
     parameters_file.write("num_epochs\t" + str(num_epochs) + '\n')
     parameters_file.write("num_training_iterations\t" + str(num_training_iterations) + '\n')
 

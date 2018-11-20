@@ -7,8 +7,6 @@
 # 5 Province
 # 6 Smithy
 
-# eventually want to have this all stored in a database
-
 class Card:
     # Stores attributes of a card
 

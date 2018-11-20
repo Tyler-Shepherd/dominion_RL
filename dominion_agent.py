@@ -137,7 +137,7 @@ class dominion_agent():
         # num of each card opponent has, opponent vp total
         # player vp total
         # opponent - player vp difference
-        # a's id
+        # one-hot vector for a's id
         # special for if a is Nothing?
 
         f = []
@@ -196,17 +196,17 @@ class dominion_agent():
 
     # Reward is the current difference in scores between player and opponent
     def reward(self):
-        # current_state = self.at_goal_state()
-        #
-        # if current_state == -1:
-        #     # Not a goal state
-        #     reward_val =  0
-        # else:
-        #     reward_val = self.player.num_victory_points() - self.turn_num
+        current_state = self.at_goal_state()
+
+        if current_state == -1:
+            # Not a goal state
+            reward_val =  0
+        else:
+            reward_val = self.player.num_victory_points() - self.opponent.player.num_victory_points()
 
         # doing this might incentive just buying estate early
         # could try doing this only when at end of game
-        reward_val = self.player.num_victory_points() - self.opponent.player.num_victory_points()
+        # reward_val = self.player.num_victory_points() - self.opponent.player.num_victory_points()
 
         return torch.tensor(reward_val, dtype = torch.float32)
 
