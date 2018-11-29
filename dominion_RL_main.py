@@ -176,7 +176,7 @@ if __name__ == '__main__':
             player_vp = agent.player.num_victory_points()
             opp_vp = agent.opponent.player.num_victory_points()
 
-            result_text = "%s\t%d\t%d\t%d\t%d\t%f" % (str(kingdom), agent.turn_num, player_vp > opp_vp, opp_vp, player_vp, end - start)
+            result_text = "%s\t%d\t%d\t%d\t%d\t%f" % (str(kingdom), agent.turn_num - 1, player_vp > opp_vp, opp_vp, player_vp, end - start)
             print(i, result_text)
             output_file.write(result_text + '\n')
             output_file.flush()

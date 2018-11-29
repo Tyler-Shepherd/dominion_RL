@@ -79,6 +79,7 @@ class dominion_agent():
     Returns 2 if game is over (3 piles gone)
     '''
     def at_goal_state(self):
+        assert self.kingdom[5] >= 0
         if self.kingdom[5] == 0:
             return 1
 
@@ -237,11 +238,12 @@ class dominion_agent():
     Plays a single game on test_env
     Returns whether won, number of turns, number of VP of player, number of VP of opponent
     '''
-    def test_model(self, test_env, test_output_full_file):
+    def test_model(self, test_env, test_output_full_file = None):
         self.initialize(test_env)
         self.reset_environment()
 
-        test_output_full_file.write(str(test_env) + '\n')
+        if test_output_full_file:
+            test_output_full_file.write(str(test_env) + '\n')
 
         # Play using model greedily
         with torch.no_grad():
@@ -257,16 +259,19 @@ class dominion_agent():
                         max_action = e
                         max_action_val = action_val
 
-                test_output_full_file.write(str(self.turn_num) + '\t' + str(self.player.num_coins()) + '\t' + str(max_action.name) + '\n')
+                if test_output_full_file:
+                    test_output_full_file.write(str(self.turn_num) + '\t' + str(self.player.num_coins()) + '\t' + str(max_action.name) + '\n')
 
                 self.make_move(max_action, f_testing=True)
-
-        test_output_full_file.write('--------------------------------------------\n')
 
         player_vp = self.player.num_victory_points()
         opp_vp = self.opponent.player.num_victory_points()
 
-        return player_vp > opp_vp, self.turn_num, player_vp, opp_vp
+        if test_output_full_file:
+            test_output_full_file.write('Player VP\t' + str(player_vp) + '\tOpponent VP\t' + str(opp_vp) + '\tDifference\t' + str(player_vp - opp_vp) + '\n')
+            test_output_full_file.write('--------------------------------------------\n')
+
+        return player_vp > opp_vp, self.turn_num - 1, player_vp, opp_vp
 
     def save_model(self, checkpoint_filename):
         torch.save(self.model.state_dict(), checkpoint_filename)
