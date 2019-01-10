@@ -1,17 +1,23 @@
 import random
-
 from card import Card
-import params as params
+
+# Abstract base class that describes a player
+# Defines current state of deck, hand, and discard
 
 class Player:
-    # Stores current state of player
 
     def __init__(self):
+        pass
+
+    def reset_game(self):
         self.hand = []
         self.deck = [Card(0), Card(0), Card(0), Card(0), Card(0), Card(0), Card(0), Card(3), Card(3), Card(3)]
         self.discard = []
 
         random.shuffle(self.deck)
+
+        # draw first five
+        self.clean_up()
 
     def draw(self, num_to_draw):
         cards_drawn = []
@@ -35,22 +41,6 @@ class Player:
         self.hand = []
         self.draw(5)
 
-
-    def action_phase(self):
-        actions_remaining = 1
-
-        action_cards = [card for card in self.hand if card.f_action]
-
-        while actions_remaining > 0 and len(action_cards) > 0:
-            # Currently just plays in order
-            card_to_play = action_cards.pop()
-            self.hand.remove(card_to_play)
-            card_to_play.play(self)
-            actions_remaining -= 1
-
-            if params.debug_mode >= 2:
-                print("Playing", card_to_play.name)
-
     def num_coins(self):
         coins = sum(card.coin_value for card in self.hand if card.f_treasure)
         return coins
@@ -65,21 +55,22 @@ class Player:
 
         return vp_deck + vp_discard + vp_hand
 
-    # def buy_phase(self):
-    #     coins = sum(card.coin_value for card in self.hand if card.f_treasure)
-    #
-    #     print("has", coins, "coins")
-    #
-    #     card_to_buy = None
-    #     max_cost = -1
-    #     for c in kingdom.keys():
-    #         card = Card(c)
-    #         if card.cost > max_cost and card.cost <= coins and kingdom[c] > 0:
-    #             card_to_buy = card
-    #             max_cost = Card(c).cost
-    #
-    #     print("buying", card_to_buy.name)
-    #
-    #     if card_to_buy is not None:
-    #         self.hand.append(card_to_buy)
-    #         kingdom[card_to_buy.id] -= 1
+    def action_phase(self):
+        pass
+
+    def buy_phase(self):
+        pass
+
+    '''
+    Prints deck and hand
+    '''
+    def print_state(self):
+        pdeck = []
+        for card in self.deck:
+            pdeck.append(card.name)
+        print("Deck:", pdeck)
+
+        phand = []
+        for card in self.hand:
+            phand.append(card.name)
+        print("Hand:", phand)

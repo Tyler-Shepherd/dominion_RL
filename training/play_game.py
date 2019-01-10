@@ -1,6 +1,5 @@
-from RL_base import RL_base
-from dominion_agent import dominion_agent
-import params as params
+from training import params as params
+from training.dominion_agent import dominion_agent
 
 if __name__ == '__main__':
     agent = dominion_agent("")

@@ -18,7 +18,6 @@ learning_rate_end = 0.01
 learning_rate_decay = 20000
 
 discount_factor = 0.95
-# exploration_rate = 0.4
 
 # used in boltzmann
 tau_start = 1.0
@@ -51,7 +50,6 @@ def print_params(parameters_file):
         parameters_file.write("Learning Rate Decay Rate\t" + str(learning_rate_decay) + '\n')
 
     parameters_file.write("discount_factor\t" + str(discount_factor) + '\n')
-    # parameters_file.write("exploration_rate\t" + str(exploration_rate) + '\n')
 
     parameters_file.write("tau_start\t" + str(tau_start) + '\n')
     parameters_file.write("tau_end\t" + str(tau_end) + '\n')
