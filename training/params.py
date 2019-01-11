@@ -26,7 +26,7 @@ tau_decay = 1000000
 
 update_target_network_every = 1
 
-D_in = 6
+D_in = 5
 H = 10
 D_out = 1
 

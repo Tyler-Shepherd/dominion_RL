@@ -2,11 +2,11 @@ import random
 import time
 
 import torch
-from numpy import *
+import numpy as np
 
 import training.params as params
 from training.RL_base import RL_base
-from training.dominion_agent import dominion_agent
+from training.dominion_agent import Dominion_Agent
 from training.opponents.buy_only_treasure import Buy_Only_Treasure_Opponent
 
 def generate_kingdom():
@@ -85,12 +85,12 @@ if __name__ == '__main__':
     print("model_id", model_id)
 
     # Open files for output
-    output_filename = "results/" + str(model_id) + '_training.txt'
-    loss_filename = "results/" + str(model_id) + "_loss.txt"
-    test_output_filename = "results/" + str(model_id) + "_test.txt"
-    test_output_full_filename = "results/" + str(model_id) + "_test_full.txt"
-    val_output_filename = "results/" + str(model_id) + "_val.txt"
-    val_output_full_filename = "results/" + str(model_id) + "_val_full.txt"
+    output_filename = "training/results/" + str(model_id) + '_training.txt'
+    loss_filename = "training/results/" + str(model_id) + "_loss.txt"
+    test_output_filename = "training/results/" + str(model_id) + "_test.txt"
+    test_output_full_filename = "training/results/" + str(model_id) + "_test_full.txt"
+    val_output_filename = "training/results/" + str(model_id) + "_val.txt"
+    val_output_full_filename = "training/results/" + str(model_id) + "_val_full.txt"
     output_file = open(output_filename, "w+")
     loss_file = open(loss_filename, "w+")
     test_file = open(test_output_filename, "w+")
@@ -102,7 +102,7 @@ if __name__ == '__main__':
     loss_file.flush()
 
     # Make agent and base
-    agent = dominion_agent(loss_file)
+    agent = Dominion_Agent(loss_file)
     base = RL_base()
 
     # Counter variables
@@ -115,7 +115,7 @@ if __name__ == '__main__':
     print(header)
     output_file.write(header+'\n')
 
-    parameters_output_filename = "results/" + str(model_id) + "_parameters.txt"
+    parameters_output_filename = "training/results/" + str(model_id) + "_parameters.txt"
     parameters_file = open(parameters_output_filename, "w+")
     params.print_params(parameters_file)
 
@@ -149,9 +149,11 @@ if __name__ == '__main__':
         random.shuffle(train_kingdoms)
 
         for kingdom in train_kingdoms:
-            # Run the agent
+            opponent = Buy_Only_Treasure_Opponent()
+
+            # Run the agent on kingdom against opponent
             start = time.perf_counter()
-            base.reinforcement_loop(agent, Buy_Only_Treasure_Opponent(), kingdom)
+            base.reinforcement_loop(agent, opponent, kingdom)
             end = time.perf_counter()
 
             total_time += (end - start)
@@ -159,10 +161,10 @@ if __name__ == '__main__':
             # if want > 1 training iteration, need to save num times won, vp over multiple iterations in base
             assert params.num_training_iterations == 1
 
-            player_vp = agent.player.num_victory_points()
-            opp_vp = agent.opponent.player.num_victory_points()
+            player_vp = agent.num_victory_points()
+            opp_vp = opponent.num_victory_points()
 
-            result_text = "%s\t%d\t%d\t%d\t%d\t%f" % (str(kingdom), agent.turn_num - 1, player_vp > opp_vp, opp_vp, player_vp, end - start)
+            result_text = "%s\t%d\t%d\t%d\t%d\t%f" % (str(kingdom), base.turn_num, player_vp > opp_vp, opp_vp, player_vp, end - start)
             print(i, result_text)
             output_file.write(result_text + '\n')
             output_file.flush()

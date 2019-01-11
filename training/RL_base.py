@@ -1,6 +1,11 @@
 import math
 import numpy as np
+import random
+import torch
+from torch.autograd import Variable
+
 from training import params as params
+import dominion_utils
 
 # Base functions and training environment for RL
 
@@ -55,48 +60,84 @@ class RL_base():
 
         return -1
 
+    '''
+    RL reward is the difference in score between player and opponent at end of game
+    '''
+    def reward(self):
+        current_state = self.at_goal_state()
+
+        if current_state == -1:
+            # Not a goal state
+            reward_val =  0
+        else:
+            reward_val = self.agent.num_victory_points() - self.opponent.num_victory_points()
+
+        return torch.tensor(reward_val, dtype = torch.float32)
+
+    def get_agent_buy_policy(self):
+        legal_actions = self.agent.get_legal_actions()
+
+        if params.debug_mode >= 3:
+            self.agent.print_state()
+            print("legal actions:", [c.name for c in legal_actions])
+
+        assert len(legal_actions) > 0 # can always skip buy
+
+        # Boltzmann exploration
+        q_vals = []
+        self.tau = params.tau_end + (params.tau_start - params.tau_end) * math.exp(
+            -1. * self.agent.running_states / params.tau_decay)
+        for e in legal_actions:
+            q_vals.append(math.exp(self.agent.get_Q_val(e).item() / self.tau))
+        q_sum = sum(q_vals)
+        probs = []
+        for v in q_vals:
+            probs.append(v / q_sum)
+        legal_actions_index = [i for i in range(len(legal_actions))]
+        a = legal_actions[np.random.choice(legal_actions_index, p=probs)]
+
+        assert a is not None
+
+        return a
+
+
     def learning_iteration(self):
         # Reset game
         self.reset_environment()
 
+        # 1 if agent turn
+        # -1 if opponent turn
+        whose_turn = 1 if random.random() < 0.5 else -1
+        starting_player = whose_turn
+
         # While not reached goal state
         while self.at_goal_state() == -1:
-            legal_actions = self.agent.get_legal_actions()
+            if whose_turn != starting_player:
+                self.turn_num += 1
 
-            if params.debug_mode >= 3:
-                self.agent.print_state()
-                print("legal actions:", [c.name for c in legal_actions])
+            if whose_turn == 1:
+                # Agent's turn
+                self.agent.action_phase()
 
-            if len(legal_actions) == 0:
-                # No possible actions
-                if params.debug_mode >= 2:
-                    print("no purchaseable cards")
-                # TODO what should happen in this case?
-                # shouldn't ever be possible due to 'skip buy' action right?
-                break
+                # TODO extend over multiple buys
+                card_to_purchase = self.get_agent_buy_policy()
 
-            # Boltzmann exploration
-            q_vals = []
-            self.tau = params.tau_end + (params.tau_start - params.tau_end) * math.exp(
-                -1. * self.agent.running_states / params.tau_decay)
-            for e in legal_actions:
-                q_vals.append(math.exp(self.agent.get_Q_val(e).item() / self.tau))
-            q_sum = sum(q_vals)
-            probs = []
-            for v in q_vals:
-                probs.append(v / q_sum)
-            legal_actions_index = [i for i in range(len(legal_actions))]
-            a = legal_actions[np.random.choice(legal_actions_index, p=probs)]
+                # Take the action and update q vals
+                self.update_q(card_to_purchase)
 
-            assert a is not None
+                self.agent.clean_up()
 
-            # Take the action and update q vals
-            self.update_q(a)
+                if params.f_learning_rate_decay:
+                    # from https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html (originally for exploration rate decay)
+                    self.learning_rate = params.learning_rate_end + (params.learning_rate_start - params.learning_rate_end) * math.exp(
+                        -1. * self.agent.running_states / params.learning_rate_decay)
+            else:
+                # Opponent's turn
+                self.opponent.action_phase()
+                self.opponent.buy_phase()
+                self.opponent.clean_up()
 
-            if params.f_learning_rate_decay:
-                # from https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html (originally for exploration rate decay)
-                self.learning_rate = params.learning_rate_end + (params.learning_rate_start - params.learning_rate_end) * math.exp(
-                    -1. * self.agent.running_states / params.learning_rate_decay)
+            whose_turn = whose_turn * -1
 
 
     '''
@@ -125,21 +166,27 @@ class RL_base():
     def update_q(self, a):
         old_q_value = self.agent.get_Q_val(a)
 
-        # Actually updates the agent state
-        self.agent.make_move(a)
+        # Agent buys card a
+        dominion_utils.buy_card(self.agent, a, self.kingdom)
+
+        # Output loss
+        self.agent.running_states += 1
+        if self.agent.running_states % params.print_loss_every == 0:
+            print("*******LOSS:", self.agent.running_loss / params.print_loss_every)
+            self.agent.loss_output_file.write(
+                str(self.agent.running_states) + '\t' + str(self.agent.running_loss / params.print_loss_every) + '\n')
+            self.agent.loss_output_file.flush()
+
+            self.agent.running_loss = 0
 
         # Gets reward of current (now updated) state
-        new_reward = self.agent.reward()
+        new_reward = self.reward()
 
         # Get the maximum estimated q value of all possible actions after buying a
         max_next_q_val = float("-inf")
         next_legal_actions = self.agent.get_legal_actions()
 
-        if len(next_legal_actions) == 0:
-            # If there are no legal next actions, then we've reached a goal state
-            # Estimate of next state is just 0 (since there is no next state)
-            # TODO what does this mean
-            max_next_q_val = 0
+        assert len(next_legal_actions) > 0 # can always skip buy
 
         for e in next_legal_actions:
             max_next_q_val = max(max_next_q_val, self.agent.get_Q_val(e, use_target_net=True))

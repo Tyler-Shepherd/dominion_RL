@@ -2,20 +2,20 @@ import copy
 import sys
 
 import torch
-from numpy import *
+import numpy as np
 from torch.autograd import Variable
 
 from card import Card
 from player import Player
 from training import params as params
 
-sys.path.append("./opponents")
-from buy_only_treasure import Buy_Only_Treasure_Opponent
+from training.opponents.buy_only_treasure import Buy_Only_Treasure_Opponent
 
-class dominion_agent():
+class Dominion_Agent(Player):
     def __init__(self, loss_output_file):
-        # Initialize learning model
+        super(Dominion_Agent, self).__init__()
 
+        # Initialize learning model
         self.model = torch.nn.Sequential(
             torch.nn.Linear(params.D_in, params.H),
             torch.nn.Sigmoid(),
@@ -46,7 +46,7 @@ class dominion_agent():
     Returns all possible cards purchaseable
     '''
     def get_legal_actions(self):
-        coins = self.player.num_coins()
+        coins = self.num_coins()
         if params.debug_mode >= 2:
             print("Agent has", coins, "coins")
 
@@ -91,12 +91,12 @@ class dominion_agent():
         # special for if a is Nothing?
 
         f = []
-        f.append(self.player.num_coins())
+        f.append(self.num_coins())
         f.append(a.cost)
         f.append(2 * int(a.f_victory) - 1)
         f.append(2 * int(a.f_treasure) - 1)
         f.append(2 * int(a.f_action) - 1)
-        f.append(self.turn_num)
+        # f.append(turn_num)
 
         return Variable(torch.from_numpy(np.array(f)).float())
 
@@ -107,58 +107,59 @@ class dominion_agent():
             return self.target_model(state_features)
         return self.model(state_features)
 
-    '''
-    Buys card a, has opponent play out full turn, then plays out next turn's action phase for this player
-    '''
-    def make_move(self, a, f_testing = False):
-        assert a is not None
+    # '''
+    # Buys card a, has opponent play out full turn, then plays out next turn's action phase for this player
+    # '''
+    # def make_move(self, a, f_testing = False):
+    #     assert a is not None
+    #
+    #     if params.debug_mode >= 2:
+    #         print("Agent buying", a.name)
+    #
+    #     # unless purchasing nothing, remove card from kingdom
+    #     if a.id != -1:
+    #         self.discard.append(a)
+    #         self.kingdom[a.id] -= 1
+    #
+    #     self.clean_up()
+    #
+    #     self.opponent.action_phase()
+    #     self.opponent.buy_phase()
+    #     self.opponent.player.clean_up()
+    #
+    #     # TODO what if the game ends here?
+    #
+    #     self.turn_num += 1
+    #     if params.debug_mode >= 3:
+    #         print("Turn", self.turn_num)
+    #     self.player.action_phase()
+    #
+    #     if not f_testing:
+    #         self.running_states += 1
+    #
+    #         if self.running_states % params.print_loss_every == 0:
+    #             print("*******LOSS:", self.running_loss / params.print_loss_every)
+    #             self.loss_output_file.write(str(self.running_states) + '\t' + str(self.running_loss / params.print_loss_every) + '\n')
+    #             self.loss_output_file.flush()
+    #
+    #             self.running_loss = 0
 
-        if params.debug_mode >= 2:
-            print("Agent buying", a.name)
 
-        # unless purchasing nothing, remove card from kingdom
-        if a.id != -1:
-            self.player.discard.append(a)
-            self.kingdom[a.id] -= 1
-
-        self.player.clean_up()
-
-        self.opponent.action_phase()
-        self.opponent.buy_phase()
-        self.opponent.player.clean_up()
-
-        # TODO what if the game ends here?
-
-        self.turn_num += 1
-        if params.debug_mode >= 3:
-            print("Turn", self.turn_num)
-        self.player.action_phase()
-
-        if not f_testing:
-            self.running_states += 1
-
-            if self.running_states % params.print_loss_every == 0:
-                print("*******LOSS:", self.running_loss / params.print_loss_every)
-                self.loss_output_file.write(str(self.running_states) + '\t' + str(self.running_loss / params.print_loss_every) + '\n')
-                self.loss_output_file.flush()
-
-                self.running_loss = 0
-
-    # Reward is the current difference in scores between player and opponent
-    def reward(self):
-        current_state = self.at_goal_state()
-
-        if current_state == -1:
-            # Not a goal state
-            reward_val =  0
-        else:
-            reward_val = self.player.num_victory_points() - self.opponent.player.num_victory_points()
-
-        # doing this might incentive just buying estate early
-        # could try doing this only when at end of game
-        # reward_val = self.player.num_victory_points() - self.opponent.player.num_victory_points()
-
-        return torch.tensor(reward_val, dtype = torch.float32)
+    # # Reward is the current difference in scores between player and opponent
+    # def reward(self):
+    #     current_state = self.at_goal_state()
+    #
+    #     if current_state == -1:
+    #         # Not a goal state
+    #         reward_val =  0
+    #     else:
+    #         reward_val = self.player.num_victory_points() - self.opponent.player.num_victory_points()
+    #
+    #     # doing this might incentive just buying estate early
+    #     # could try doing this only when at end of game
+    #     # reward_val = self.player.num_victory_points() - self.opponent.player.num_victory_points()
+    #
+    #     return torch.tensor(reward_val, dtype = torch.float32)
 
     def update_q(self, learning_rate, old_q_value, new_q_value):
 
@@ -188,6 +189,7 @@ class dominion_agent():
     Returns whether won, number of turns, number of VP of player, number of VP of opponent
     '''
     def test_model(self, test_env, test_output_full_file = None):
+        # TODO all of it, do we even want it here?
         self.initialize(test_env)
         self.reset_environment()
 
