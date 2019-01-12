@@ -1,13 +1,13 @@
 import datetime
 
-debug_mode = 0
+debug_mode = 3
 print_loss_every = 1000
 
-num_train_kingdoms = 100
+num_train_kingdoms = 1
 num_test_kingdoms = 10
 num_val_kingdoms = 10
 
-num_epochs = 100000
+num_epochs = 1
 num_training_iterations = 1
 
 learning_rate = 0.01

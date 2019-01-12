@@ -8,6 +8,7 @@ from torch.autograd import Variable
 from card import Card
 from player import Player
 from training import params as params
+import dominion_utils
 
 from training.opponents.buy_only_treasure import Buy_Only_Treasure_Opponent
 
@@ -188,41 +189,61 @@ class Dominion_Agent(Player):
     Plays a single game on test_env
     Returns whether won, number of turns, number of VP of player, number of VP of opponent
     '''
-    def test_model(self, test_env, test_output_full_file = None):
-        # TODO all of it, do we even want it here?
-        self.initialize(test_env)
-        self.reset_environment()
+    # def test_model(self, test_env, test_output_full_file = None):
+    #     # TODO all of it, do we even want it here?
+    #     self.initialize(test_env)
+    #     self.reset_environment()
+    #
+    #     if test_output_full_file:
+    #         test_output_full_file.write(str(test_env) + '\n')
+    #
+    #     # Play using model greedily
+    #     with torch.no_grad():
+    #         while self.at_goal_state() == -1:
+    #             legal_actions = self.get_legal_actions()
+    #
+    #             max_action = None
+    #             max_action_val = float("-inf")
+    #             for e in legal_actions:
+    #                 action_val = self.get_Q_val(e)
+    #
+    #                 if action_val > max_action_val:
+    #                     max_action = e
+    #                     max_action_val = action_val
+    #
+    #             if test_output_full_file:
+    #                 test_output_full_file.write(str(self.turn_num) + '\t' + str(self.player.num_coins()) + '\t' + str(max_action.name) + '\n')
+    #
+    #             self.make_move(max_action, f_testing=True)
+    #
+    #     player_vp = self.player.num_victory_points()
+    #     opp_vp = self.opponent.player.num_victory_points()
+    #
+    #     if test_output_full_file:
+    #         test_output_full_file.write('Player VP\t' + str(player_vp) + '\tOpponent VP\t' + str(opp_vp) + '\tDifference\t' + str(player_vp - opp_vp) + '\n')
+    #         test_output_full_file.write('--------------------------------------------\n')
+    #
+    #     return player_vp > opp_vp, self.turn_num - 1, player_vp, opp_vp
 
-        if test_output_full_file:
-            test_output_full_file.write(str(test_env) + '\n')
+    '''
+    Does buy phase using learned model greedily
+    '''
+    def buy_phase(self):
+        legal_actions = self.get_legal_actions()
 
-        # Play using model greedily
-        with torch.no_grad():
-            while self.at_goal_state() == -1:
-                legal_actions = self.get_legal_actions()
+        max_action = None
+        max_action_val = float("-inf")
+        for e in legal_actions:
+            action_val = self.get_Q_val(e)
 
-                max_action = None
-                max_action_val = float("-inf")
-                for e in legal_actions:
-                    action_val = self.get_Q_val(e)
+            if action_val > max_action_val:
+                max_action = e
+                max_action_val = action_val
 
-                    if action_val > max_action_val:
-                        max_action = e
-                        max_action_val = action_val
+        dominion_utils.buy_card(self, max_action, self.kingdom)
 
-                if test_output_full_file:
-                    test_output_full_file.write(str(self.turn_num) + '\t' + str(self.player.num_coins()) + '\t' + str(max_action.name) + '\n')
-
-                self.make_move(max_action, f_testing=True)
-
-        player_vp = self.player.num_victory_points()
-        opp_vp = self.opponent.player.num_victory_points()
-
-        if test_output_full_file:
-            test_output_full_file.write('Player VP\t' + str(player_vp) + '\tOpponent VP\t' + str(opp_vp) + '\tDifference\t' + str(player_vp - opp_vp) + '\n')
-            test_output_full_file.write('--------------------------------------------\n')
-
-        return player_vp > opp_vp, self.turn_num - 1, player_vp, opp_vp
+        # TODO return list of cards when multiple buys
+        return max_action
 
     def save_model(self, checkpoint_filename):
         torch.save(self.model.state_dict(), checkpoint_filename)

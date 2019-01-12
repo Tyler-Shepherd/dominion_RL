@@ -23,7 +23,7 @@ def generate_kingdom():
     return new_kingdom
 
 
-def test_model(test_output_file, test_output_full_file, agent, test_kingdoms, num_times_tested, val_testing):
+def test_model(test_output_file, test_output_full_file, base, test_kingdoms, num_times_tested, val_testing):
     # Test the agents learned model
 
     num_won = 0
@@ -32,7 +32,7 @@ def test_model(test_output_file, test_output_full_file, agent, test_kingdoms, nu
     num_total_opp_vp = 0
     j = 0
 
-    test_output_full_file.write("**************Test " + str(num_times_tested) + '\n')
+    test_output_full_file.write("************** Test " + str(num_times_tested) + '\n')
 
     if val_testing:
         print("---------------Validation " + str(num_times_tested) + "--------------")
@@ -40,7 +40,7 @@ def test_model(test_output_file, test_output_full_file, agent, test_kingdoms, nu
         print("---------------Test " + str(num_times_tested) + "----------------")
 
     for test_kingdom in test_kingdoms:
-        player_won, test_num_turns, player_vp, opp_vp = agent.test_model(test_kingdom, test_output_full_file)
+        player_won, test_num_turns, player_vp, opp_vp = base.test_agent(Buy_Only_Treasure_Opponent(), test_kingdom, test_output_full_file)
 
         num_won += player_won
         num_total_turns += test_num_turns
@@ -103,7 +103,7 @@ if __name__ == '__main__':
 
     # Make agent and base
     agent = Dominion_Agent(loss_file)
-    base = RL_base()
+    base = RL_base(agent)
 
     # Counter variables
     i = 0
@@ -153,7 +153,7 @@ if __name__ == '__main__':
 
             # Run the agent on kingdom against opponent
             start = time.perf_counter()
-            base.reinforcement_loop(agent, opponent, kingdom)
+            base.reinforcement_loop(opponent, kingdom)
             end = time.perf_counter()
 
             total_time += (end - start)
@@ -172,8 +172,8 @@ if __name__ == '__main__':
             i += 1
 
         # test on validation data after each epoch
-        agent.save_model("results/" + str(model_id) + "_val_" + str(num_times_tested) + '.pth.tar')
-        num_won = test_model(val_file, val_full_file, agent, val_kingdoms, num_times_tested, True)
+        agent.save_model("training/results/" + str(model_id) + "_val_" + str(num_times_tested) + '.pth.tar')
+        num_won = test_model(val_file, val_full_file, base, val_kingdoms, num_times_tested, True)
         val_results.append(num_won)
         num_times_tested += 1
 
@@ -183,9 +183,9 @@ if __name__ == '__main__':
     print("Best model:", best_model)
 
     # load and test best model 10x
-    agent.load_model("results/" +str(model_id) + "_val_" + str(best_model) + '.pth.tar')
+    agent.load_model("training/results/" +str(model_id) + "_val_" + str(best_model) + '.pth.tar')
     for t in range(10):
-        test_model(test_file, test_full_file, agent, test_kingdoms, "final_" + str(t), False)
+        test_model(test_file, test_full_file, base, test_kingdoms, "final_" + str(t), False)
 
     # Close files
     output_file.close()
