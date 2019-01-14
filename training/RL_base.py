@@ -10,15 +10,61 @@ import dominion_utils
 
 # Base functions and training environment for RL
 
+class Experience_Replay():
+    # https://medium.com/ml-everything/reinforcement-learning-with-sparse-rewards-8f15b71d18bf
+    def __init__(self, buffer_size=50000, unusual_sample_factor=0.99):
+        """ Data structure used to hold game experiences """
+        # Buffer will contain [state,action,reward,next_state,done]
+        self.buffer = []
+        self.buffer_size = buffer_size
+
+        assert unusual_sample_factor <= 1, "unusual_sample_factor has to be <= 1"
+        # Setting this value to a low number over-samples experience that had unusually high or low rewards
+        self.unusual_sample_factor = unusual_sample_factor
+
+    '''
+    param experience is a list of experiences (where each experience is a list of form [state,action,reward,next_state,done]
+    '''
+    def add(self, experience):
+        """ Adds list of experiences to the buffer """
+        # Extend the stored experiences
+        self.buffer.extend(experience)
+        # Keep the last buffer_size number of experiences
+        self.buffer = self.buffer[-self.buffer_size:]
+        # Keep the extreme values near the top of the buffer for oversampling
+
+    def sample(self, size):
+        """ Returns a sample of experiences from the buffer """
+        # We want to over-sample frames where things happened. So we'll sort the buffer on the absolute reward
+        # (either positive or negative) and apply a geometric probability in order to bias our sampling to the
+        # earlier (more extreme) replays
+        buffer = sorted(self.buffer, key=lambda replay: abs(replay[2]), reverse=True)
+        p = np.array([self.unusual_sample_factor ** i for i in range(len(buffer))])
+        p = p / sum(p)
+        sample_idxs = np.random.choice(np.arange(len(buffer)), size=size, p=p)
+        sample_output = [buffer[idx] for idx in sample_idxs]
+        sample_output = np.reshape(sample_output, (size, -1))
+        return sample_output
+
 class RL_base():
 
     def __init__(self, agent):
         self.tau = params.tau_start
         self.learning_rate = params.learning_rate
 
+        self.num_times_trained = 0 # num times experience replay training has occurred
+        self.running_states = 0 # num actions taken
+        self.running_samples = 0 # num times a sample has been drawn and trained on
+        self.running_iters = 0 # num iterations run / games that have been played
+        self.buffer = Experience_Replay(buffer_size=params.buffer_size, unusual_sample_factor=params.unusual_sample_factor)
+
         self.kingdom = None
         self.agent = agent
         self.opponent = None
+
+        # Experience of form [state,action,reward,next_state,done,next_legal_actions]
+        self.previous_experience = None
+        self.current_experience = None
 
     '''
     Resets game to beginning
@@ -68,7 +114,7 @@ class RL_base():
         # Boltzmann exploration
         q_vals = []
         self.tau = params.tau_end + (params.tau_start - params.tau_end) * math.exp(
-            -1. * self.agent.running_states / params.tau_decay)
+            -1. * self.running_states / params.tau_decay)
         for e in legal_actions:
             q_vals.append(math.exp(self.agent.get_Q_val(e).item() / self.tau))
         q_sum = sum(q_vals)
@@ -82,7 +128,9 @@ class RL_base():
 
         return a
 
-
+    '''
+    Plays a single game, recording experiences
+    '''
     def learning_iteration(self):
         # Reset game
         self.reset_environment()
@@ -109,14 +157,10 @@ class RL_base():
                 card_to_purchase = self.get_agent_buy_policy()
 
                 # Take the action and update q vals
-                self.update_q(card_to_purchase)
+                self.agent_purchase(card_to_purchase)
 
                 self.agent.clean_up()
 
-                if params.f_learning_rate_decay:
-                    # from https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html (originally for exploration rate decay)
-                    self.learning_rate = params.learning_rate_end + (params.learning_rate_start - params.learning_rate_end) * math.exp(
-                        -1. * self.agent.running_states / params.learning_rate_decay)
             else:
                 if params.debug_mode >= 3:
                     self.opponent.print_state()
@@ -129,66 +173,115 @@ class RL_base():
 
             whose_turn = whose_turn * -1
 
-
     '''
     Main reinforcement learning loop
-    agent is the selected agent for learning
-    kingdom is the selected kingdom to play on
+    Plays on kingdom against opponent
     '''
     def reinforcement_loop(self, opponent, kingdom):
         self.opponent = opponent
         self.kingdom = copy.deepcopy(kingdom)
 
-        assert params.num_training_iterations % params.update_target_network_every == 0
+        assert params.num_train_kingdoms * params.num_training_iterations % params.train_from_experiences_every_iterations == 0
+        assert (params.num_train_kingdoms * params.num_training_iterations / params.train_from_experiences_every_iterations) % params.update_target_network_every == 0
 
         for iter in range(params.num_training_iterations):
             self.learning_iteration()
+            self.running_iters += 1
 
-            # update target network
-            if iter % params.update_target_network_every == 0:
-                self.agent.target_model.load_state_dict(self.agent.model.state_dict())
+            # Train on samples from experience replay buffer
+            if self.running_iters % params.train_from_experiences_every_iterations == 0:
+                print("Starting training after {} iterations".format(self.running_iters))
+                self.train()
 
-        return self.agent
+    '''
+    Has agent purchase card a, saves experience in replay buffer
+    '''
+    def agent_purchase(self, a):
+        # Experience of form [state,action,reward,next_state,done,next_legal_actions]
+        if self.previous_experience is not None:
+            # Add legal actions to the experience from two steps ago
+            self.previous_experience.append(self.agent.get_legal_actions())
+            self.buffer.add([self.previous_experience.copy()])
+        if self.current_experience is not None:
+            # Add next_state to the previous experience before starting new experience
+            self.current_experience.append(self.agent.get_current_state())
+            self.current_experience.append(self.at_goal_state() != -1)
+            self.previous_experience = self.current_experience.copy()
 
-
-    def update_q(self, a):
-        old_q_value = self.agent.get_Q_val(a)
+        self.current_experience = []
+        self.current_experience.append(self.agent.get_current_state())
+        self.current_experience.append(a)
 
         # Agent buys card a
         dominion_utils.buy_card(self.agent, a, self.kingdom)
+        self.running_states += 1
 
         if params.debug_mode >= 2:
             print("Agent buying", a.name)
 
-        # Output loss
-        self.agent.running_states += 1
-        if self.agent.running_states % params.print_loss_every == 0:
-            print("*******LOSS:", self.agent.running_loss / params.print_loss_every)
-            self.agent.loss_output_file.write(
-                str(self.agent.running_states) + '\t' + str(self.agent.running_loss / params.print_loss_every) + '\n')
-            self.agent.loss_output_file.flush()
-
-            self.agent.running_loss = 0
-
-        # Gets reward of current (now updated) state
         new_reward = self.reward()
+        self.current_experience.append(new_reward)
 
-        # Get the maximum estimated q value of all possible actions after buying a
-        max_next_q_val = float("-inf")
-        next_legal_actions = self.agent.get_legal_actions()
-        # TODO ok this doesn't work right now since "next legal actions" at this point is still the same set of cards
-        # once implement experience replay need to use the max q val of the next turns buy options
+    '''
+    Samples from experience replay buffer to train agent
+    '''
+    def train(self):
+        if len(self.buffer.buffer) == 0:
+            # Nothing in buffer, nothing to train
+            return
 
-        assert len(next_legal_actions) > 0 # can always skip buy
+        samples = self.buffer.sample(params.batch_size)
 
-        for e in next_legal_actions:
-            max_next_q_val = max(max_next_q_val, self.agent.get_Q_val(e, use_target_net=True))
+        for s in samples:
+            #[state, action, reward, next_state, done, next_legal_actions]
+            state = s[0]
+            action = s[1]
+            reward = s[2]
+            next_state = s[3]
+            done = s[4]
+            next_legal_actions = s[5]
 
-        new_q_value = new_reward + params.discount_factor * max_next_q_val
+            self.agent.set_state(state)
+            old_q_value = self.agent.get_Q_val(action)
 
-        self.agent.update_q(self.learning_rate, old_q_value, new_q_value)
+            self.agent.set_state(next_state)
 
+            if done:
+                max_next_q_val = 0
+            else:
+                # Get the maximum estimated q value of all possible actions after buying a
+                max_next_q_val = float("-inf")
 
+                assert len(next_legal_actions) > 0 # can always skip buy
+
+                for e in next_legal_actions:
+                    max_next_q_val = max(max_next_q_val, self.agent.get_Q_val(e, use_target_net=True))
+
+            new_q_value = reward + params.discount_factor * max_next_q_val
+            self.agent.update_q(self.learning_rate, old_q_value, new_q_value)
+
+            self.running_samples += 1
+            if params.f_learning_rate_decay:
+                # from https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html (originally for exploration rate decay)
+                self.learning_rate = params.learning_rate_end + (params.learning_rate_start - params.learning_rate_end) * math.exp(
+                    -1. * self.running_samples / params.learning_rate_decay)
+
+        # avg loss per sample
+        loss_avg = self.agent.running_loss / params.batch_size
+        print("Experience Replay Training {:d}, LOSS {:f}".format(self.num_times_trained, loss_avg))
+        self.agent.loss_output_file.write(str(self.num_times_trained) + '\t' + str(loss_avg) + '\n')
+        self.agent.loss_output_file.flush()
+
+        self.agent.running_loss = 0
+        self.num_times_trained += 1
+
+        # update target network
+        if self.num_times_trained % params.update_target_network_every == 0:
+            self.agent.target_model.load_state_dict(self.agent.model.state_dict())
+
+    '''
+    Plays one game using current agent against opponent on kingdom, and prints output to test_output_full_file
+    '''
     def test_agent(self, opponent, kingdom, test_output_full_file):
         self.opponent = opponent
         self.kingdom = copy.deepcopy(kingdom)

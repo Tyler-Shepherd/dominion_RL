@@ -11,6 +11,12 @@ class Kingdom:
         self.trash = []
         self.turn_num = 0
 
+    def __str__(self):
+        pkingdom = {}
+        for card in self.supply.keys():
+            pkingdom[Card(card).name] = self.supply[card]
+        return str(pkingdom)
+
     def reset(self):
         self.supply = copy.deepcopy(self.supply_initial)
         self.trash = []

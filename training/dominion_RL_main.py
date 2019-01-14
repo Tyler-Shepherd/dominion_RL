@@ -99,7 +99,7 @@ if __name__ == '__main__':
     val_file = open(val_output_filename, "w+")
     val_full_file = open(val_output_full_filename, "w+")
 
-    loss_file.write('Num States' + '\t' + 'Loss Per State' + '\n')
+    loss_file.write('Num Times Trained' + '\t' + 'Loss Per Sample' + '\n')
     loss_file.flush()
 
     # Make agent and base
@@ -112,7 +112,7 @@ if __name__ == '__main__':
     total_num_turns = 0
 
     # Print header
-    header = "Kingdom\tTurns\tPlayer Won\tOpponent VP\tPlayer VP\tRuntime"
+    header = "Kingdom\tLearning Rate\tTau\tTurns\tPlayer Won\tOpponent VP\tPlayer VP\tRuntime"
     print(header)
     output_file.write(header+'\n')
 
@@ -165,7 +165,7 @@ if __name__ == '__main__':
             player_vp = agent.num_victory_points()
             opp_vp = opponent.num_victory_points()
 
-            result_text = "%s\t%d\t%d\t%d\t%d\t%f" % (str(kingdom), kingdom.turn_num, player_vp > opp_vp, opp_vp, player_vp, end - start)
+            result_text = "%s\t%f\t%f\t%d\t%d\t%d\t%d\t%f" % (str(kingdom), base.learning_rate, base.tau, kingdom.turn_num, player_vp > opp_vp, opp_vp, player_vp, end - start)
             print(i, result_text)
             output_file.write(result_text + '\n')
             output_file.flush()
@@ -173,10 +173,11 @@ if __name__ == '__main__':
             i += 1
 
         # test on validation data after each epoch
-        agent.save_model("training/results/" + str(model_id) + "_val_" + str(num_times_tested) + '.pth.tar')
-        num_won = test_model(val_file, val_full_file, base, val_kingdoms, num_times_tested, True)
-        val_results.append(num_won)
-        num_times_tested += 1
+        if epoch % params.test_on_val_every_epochs == 0:
+            agent.save_model("training/results/" + str(model_id) + "_val_" + str(num_times_tested) + '.pth.tar')
+            num_won = test_model(val_file, val_full_file, base, val_kingdoms, num_times_tested, True)
+            val_results.append(num_won)
+            num_times_tested += 1
 
     print('----------------------Training Done------------------------------')
     print("Validation results:", val_results)

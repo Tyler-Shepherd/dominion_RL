@@ -74,3 +74,8 @@ class Player:
         for card in self.hand:
             phand.append(card.name)
         print("Hand:", phand)
+
+        pdiscard = []
+        for card in self.discard:
+            pdiscard.append(card.name)
+        print("Discard:", pdiscard)

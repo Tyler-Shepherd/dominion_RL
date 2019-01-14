@@ -29,10 +29,10 @@ class Dominion_Agent(Player):
         self.target_model.load_state_dict(self.model.state_dict())
 
         self.running_loss = 0
-        self.running_states = 0
         self.loss_output_file = loss_output_file
 
-        self.loss_fn = torch.nn.MSELoss(size_average=False)  # using mean squared error
+        # self.loss_fn = torch.nn.MSELoss(size_average=False)  # using mean squared error
+        self.loss_fn = torch.nn.SmoothL1Loss(size_average=False)  # Huber loss
 
     '''
     Initializes environment for an iteration of learning
@@ -92,7 +92,6 @@ class Dominion_Agent(Player):
 
         # Compute loss
         loss = self.loss_fn(old_q_value, new_q_value)
-
         self.running_loss += loss.item()
 
         # Zero the gradients before running the backward pass.
@@ -124,6 +123,7 @@ class Dominion_Agent(Player):
                 max_action = e
                 max_action_val = action_val
 
+        assert max_action is not None
         dominion_utils.buy_card(self, max_action, self.kingdom)
 
         if params.debug_mode >= 2:
@@ -140,3 +140,22 @@ class Dominion_Agent(Player):
         checkpoint = torch.load(checkpoint_filename)
         self.model.load_state_dict(checkpoint)
         print("Loaded model from " + checkpoint_filename)
+
+    def get_current_state(self):
+        # state is of form [hand, deck, discard, kingdom]
+        current_state = []
+        current_state.append(self.hand.copy())
+        current_state.append(self.deck.copy())
+        current_state.append(self.discard.copy())
+        current_state.append(copy.deepcopy(self.kingdom))
+
+        return current_state
+
+    def set_state(self, new_state):
+        # Note: you can't set state and then continue playing an actual game since opponent won't have Kingdom updated
+        # Only used for getting and updating q values
+        self.hand = new_state[0]
+        self.deck = new_state[1]
+        self.discard = new_state[2]
+        self.kingdom = new_state[3]
+
