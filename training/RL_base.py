@@ -2,6 +2,7 @@ import math
 import numpy as np
 import random
 import torch
+import copy
 from torch.autograd import Variable
 
 from training import params as params
@@ -15,17 +16,15 @@ class RL_base():
         self.tau = params.tau_start
         self.learning_rate = params.learning_rate
 
-        self.kingdom_0 = None
         self.kingdom = None
         self.agent = agent
         self.opponent = None
-        self.turn_num = None
 
     '''
     Resets game to beginning
     '''
     def reset_environment(self):
-        self.kingdom = self.kingdom_0.copy()
+        self.kingdom.reset()
 
         self.agent.initialize(self.kingdom)
         self.opponent.initialize(self.kingdom)
@@ -33,12 +32,8 @@ class RL_base():
         self.agent.reset_game()
         self.opponent.reset_game()
 
-        self.trash = []
-
-        self.turn_num = 0
-
         if params.debug_mode >= 3:
-            print("Turn", self.turn_num)
+            print("Turn", self.kingdom.turn_num)
 
     '''
     Returns -1 if not at goal state (game not over)
@@ -46,19 +41,7 @@ class RL_base():
     Returns 2 if game is over (3 piles gone)
     '''
     def at_goal_state(self):
-        assert self.kingdom[5] >= 0
-        if self.kingdom[5] == 0:
-            return 1
-
-        num_empty = 0
-        for c in self.kingdom.keys():
-            if self.kingdom[c] == 0 and self.kingdom_0[c] != 0:
-                num_empty += 1
-
-        if num_empty >= 3:
-            return 2
-
-        return -1
+        return self.kingdom.is_game_over()
 
     '''
     RL reward is the difference in score between player and opponent at end of game
@@ -112,11 +95,12 @@ class RL_base():
         # While not reached goal state
         while self.at_goal_state() == -1:
             if whose_turn != starting_player:
-                self.turn_num += 1
+                self.kingdom.next_turn()
 
             if whose_turn == 1:
                 if params.debug_mode >= 3:
                     self.agent.print_state()
+                    self.kingdom.print_kingdom()
 
                 # Agent's turn
                 self.agent.action_phase()
@@ -136,6 +120,7 @@ class RL_base():
             else:
                 if params.debug_mode >= 3:
                     self.opponent.print_state()
+                    self.kingdom.print_kingdom()
 
                 # Opponent's turn
                 self.opponent.action_phase()
@@ -152,8 +137,7 @@ class RL_base():
     '''
     def reinforcement_loop(self, opponent, kingdom):
         self.opponent = opponent
-        self.kingdom_0 = kingdom.copy()
-        self.kingdom = kingdom.copy()
+        self.kingdom = copy.deepcopy(kingdom)
 
         assert params.num_training_iterations % params.update_target_network_every == 0
 
@@ -207,13 +191,12 @@ class RL_base():
 
     def test_agent(self, opponent, kingdom, test_output_full_file):
         self.opponent = opponent
-        self.kingdom_0 = kingdom.copy()
-        self.kingdom = kingdom.copy()
+        self.kingdom = copy.deepcopy(kingdom)
 
         # Reset game
         self.reset_environment()
 
-        test_output_full_file.write(str(kingdom) + '\n')
+        test_output_full_file.write(str(kingdom.supply) + '\n')
 
         # 1 if agent turn
         # -1 if opponent turn
@@ -223,14 +206,14 @@ class RL_base():
         # While not reached goal state
         while self.at_goal_state() == -1:
             if whose_turn != starting_player:
-                self.turn_num += 1
+                self.kingdom.next_turn()
 
             if whose_turn == 1:
                 # Agent's turn
                 self.agent.action_phase()
                 bought_card = self.agent.buy_phase()
 
-                test_output_full_file.write(str(self.turn_num) + '\t' + str(self.agent.num_coins()) + '\t' + str(bought_card.name) + '\n')
+                test_output_full_file.write(str(self.kingdom.turn_num) + '\t' + str(self.agent.num_coins()) + '\t' + str(bought_card.name) + '\n')
 
                 self.agent.clean_up()
             else:
@@ -248,4 +231,4 @@ class RL_base():
         test_output_full_file.write('--------------------------------------------\n')
         test_output_full_file.flush()
 
-        return player_vp > opp_vp, self.turn_num, player_vp, opp_vp
+        return player_vp > opp_vp, self.kingdom.turn_num, player_vp, opp_vp

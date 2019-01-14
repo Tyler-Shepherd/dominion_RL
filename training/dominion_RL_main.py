@@ -8,6 +8,7 @@ import training.params as params
 from training.RL_base import RL_base
 from training.dominion_agent import Dominion_Agent
 from training.opponents.buy_only_treasure import Buy_Only_Treasure_Opponent
+from kingdom import Kingdom
 
 def generate_kingdom():
     max_card_id = 6
@@ -20,7 +21,7 @@ def generate_kingdom():
         else:
             new_kingdom[i] = 0
 
-    return new_kingdom
+    return Kingdom(new_kingdom)
 
 
 def test_model(test_output_file, test_output_full_file, base, test_kingdoms, num_times_tested, val_testing):
@@ -164,7 +165,7 @@ if __name__ == '__main__':
             player_vp = agent.num_victory_points()
             opp_vp = opponent.num_victory_points()
 
-            result_text = "%s\t%d\t%d\t%d\t%d\t%f" % (str(kingdom), base.turn_num, player_vp > opp_vp, opp_vp, player_vp, end - start)
+            result_text = "%s\t%d\t%d\t%d\t%d\t%f" % (str(kingdom), kingdom.turn_num, player_vp > opp_vp, opp_vp, player_vp, end - start)
             print(i, result_text)
             output_file.write(result_text + '\n')
             output_file.flush()

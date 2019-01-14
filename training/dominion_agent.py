@@ -36,12 +36,9 @@ class Dominion_Agent(Player):
 
     '''
     Initializes environment for an iteration of learning
-    env0 is the initial state of kingdom
-    creates kingdom_0
     '''
-    def initialize(self, env0):
-        self.kingdom_0 = env0.copy()
-        self.kingdom = env0
+    def initialize(self, kingdom):
+        self.kingdom = kingdom
 
     '''
     Returns all possible cards purchaseable
@@ -56,31 +53,12 @@ class Dominion_Agent(Player):
         # "skip" card
         cards_purchasable.append(Card(-1))
 
-        for c in self.kingdom.keys():
+        for c in self.kingdom.supply.keys():
             card = Card(c)
-            if card.cost <= coins and self.kingdom[c] > 0:
+            if card.cost <= coins and self.kingdom.supply[c] > 0:
                 cards_purchasable.append(card)
 
         return cards_purchasable
-
-    '''
-    Prints deck and hand
-    '''
-    # def print_state(self):
-    #     pdeck = []
-    #     for card in self.player.deck:
-    #         pdeck.append(card.name)
-    #     print("Deck:", pdeck)
-    #
-    #     phand = []
-    #     for card in self.player.hand:
-    #         phand.append(card.name)
-    #     print("Hand:", phand)
-    #
-    #     pkingdom = {}
-    #     for card in self.kingdom.keys():
-    #         pkingdom[Card(card).name] = self.kingdom[card]
-    #     print("Kingdom:", pkingdom)
 
     # Returns input layer features at current state buying Card a
     def state_features(self, a):
@@ -97,7 +75,7 @@ class Dominion_Agent(Player):
         f.append(2 * int(a.f_victory) - 1)
         f.append(2 * int(a.f_treasure) - 1)
         f.append(2 * int(a.f_action) - 1)
-        # f.append(turn_num)
+        f.append(self.kingdom.turn_num)
 
         return Variable(torch.from_numpy(np.array(f)).float())
 
@@ -107,60 +85,6 @@ class Dominion_Agent(Player):
         if use_target_net:
             return self.target_model(state_features)
         return self.model(state_features)
-
-    # '''
-    # Buys card a, has opponent play out full turn, then plays out next turn's action phase for this player
-    # '''
-    # def make_move(self, a, f_testing = False):
-    #     assert a is not None
-    #
-    #     if params.debug_mode >= 2:
-    #         print("Agent buying", a.name)
-    #
-    #     # unless purchasing nothing, remove card from kingdom
-    #     if a.id != -1:
-    #         self.discard.append(a)
-    #         self.kingdom[a.id] -= 1
-    #
-    #     self.clean_up()
-    #
-    #     self.opponent.action_phase()
-    #     self.opponent.buy_phase()
-    #     self.opponent.player.clean_up()
-    #
-    #     # TODO what if the game ends here?
-    #
-    #     self.turn_num += 1
-    #     if params.debug_mode >= 3:
-    #         print("Turn", self.turn_num)
-    #     self.player.action_phase()
-    #
-    #     if not f_testing:
-    #         self.running_states += 1
-    #
-    #         if self.running_states % params.print_loss_every == 0:
-    #             print("*******LOSS:", self.running_loss / params.print_loss_every)
-    #             self.loss_output_file.write(str(self.running_states) + '\t' + str(self.running_loss / params.print_loss_every) + '\n')
-    #             self.loss_output_file.flush()
-    #
-    #             self.running_loss = 0
-
-
-    # # Reward is the current difference in scores between player and opponent
-    # def reward(self):
-    #     current_state = self.at_goal_state()
-    #
-    #     if current_state == -1:
-    #         # Not a goal state
-    #         reward_val =  0
-    #     else:
-    #         reward_val = self.player.num_victory_points() - self.opponent.player.num_victory_points()
-    #
-    #     # doing this might incentive just buying estate early
-    #     # could try doing this only when at end of game
-    #     # reward_val = self.player.num_victory_points() - self.opponent.player.num_victory_points()
-    #
-    #     return torch.tensor(reward_val, dtype = torch.float32)
 
     def update_q(self, learning_rate, old_q_value, new_q_value):
 
@@ -186,46 +110,6 @@ class Dominion_Agent(Player):
                 param -= learning_rate * param.grad
 
     '''
-    Plays a single game on test_env
-    Returns whether won, number of turns, number of VP of player, number of VP of opponent
-    '''
-    # def test_model(self, test_env, test_output_full_file = None):
-    #     # TODO all of it, do we even want it here?
-    #     self.initialize(test_env)
-    #     self.reset_environment()
-    #
-    #     if test_output_full_file:
-    #         test_output_full_file.write(str(test_env) + '\n')
-    #
-    #     # Play using model greedily
-    #     with torch.no_grad():
-    #         while self.at_goal_state() == -1:
-    #             legal_actions = self.get_legal_actions()
-    #
-    #             max_action = None
-    #             max_action_val = float("-inf")
-    #             for e in legal_actions:
-    #                 action_val = self.get_Q_val(e)
-    #
-    #                 if action_val > max_action_val:
-    #                     max_action = e
-    #                     max_action_val = action_val
-    #
-    #             if test_output_full_file:
-    #                 test_output_full_file.write(str(self.turn_num) + '\t' + str(self.player.num_coins()) + '\t' + str(max_action.name) + '\n')
-    #
-    #             self.make_move(max_action, f_testing=True)
-    #
-    #     player_vp = self.player.num_victory_points()
-    #     opp_vp = self.opponent.player.num_victory_points()
-    #
-    #     if test_output_full_file:
-    #         test_output_full_file.write('Player VP\t' + str(player_vp) + '\tOpponent VP\t' + str(opp_vp) + '\tDifference\t' + str(player_vp - opp_vp) + '\n')
-    #         test_output_full_file.write('--------------------------------------------\n')
-    #
-    #     return player_vp > opp_vp, self.turn_num - 1, player_vp, opp_vp
-
-    '''
     Does buy phase using learned model greedily
     '''
     def buy_phase(self):
@@ -241,6 +125,9 @@ class Dominion_Agent(Player):
                 max_action_val = action_val
 
         dominion_utils.buy_card(self, max_action, self.kingdom)
+
+        if params.debug_mode >= 2:
+            print("Agent buying", max_action.name)
 
         # TODO return list of cards when multiple buys
         return max_action

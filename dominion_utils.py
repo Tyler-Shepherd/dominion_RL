@@ -1,5 +1,6 @@
+import training.params as params
+
 def buy_card(player, card, kingdom):
     if card.id != -1:
-        assert kingdom[card.id] > 0
+        kingdom.buy_card(card)
         player.discard.append(card)
-        kingdom[card.id] -= 1
