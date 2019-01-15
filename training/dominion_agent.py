@@ -62,12 +62,13 @@ class Dominion_Agent(Player):
 
     # Returns input layer features at current state buying Card a
     def state_features(self, a):
-        # TODO: num remaining of each card in kingdom, num of each card in deck
+        # num remaining of each card in kingdom, num of each card in deck
         # num of each card opponent has, opponent vp total
         # player vp total
         # opponent - player vp difference
         # one-hot vector for a's id
         # special for if a is Nothing?
+        # who was starting player
 
         f = []
         f.append(self.num_coins())
@@ -129,7 +130,7 @@ class Dominion_Agent(Player):
         if params.debug_mode >= 2:
             print("Agent buying", max_action.name)
 
-        # TODO return list of cards when multiple buys
+        # should return list of cards when multiple buys
         return max_action
 
     def save_model(self, checkpoint_filename):

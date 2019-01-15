@@ -62,7 +62,7 @@ def test_model(test_output_file, test_output_full_file, base, test_kingdoms, num
                            + str(num_total_opp_vp) + "\t" + str(avg_opp_vp) + "\n")
     test_output_file.flush()
 
-    return win_percent
+    return win_percent, avg_player_vp - avg_opp_vp
 
 
 if __name__ == '__main__':
@@ -175,13 +175,13 @@ if __name__ == '__main__':
         # test on validation data after each epoch
         if epoch % params.test_on_val_every_epochs == 0:
             agent.save_model("training/results/" + str(model_id) + "_val_" + str(num_times_tested) + '.pth.tar')
-            num_won = test_model(val_file, val_full_file, base, val_kingdoms, num_times_tested, True)
-            val_results.append(num_won)
+            win_percent, avg_vp_diff = test_model(val_file, val_full_file, base, val_kingdoms, num_times_tested, True)
+            val_results.append(avg_vp_diff)
             num_times_tested += 1
 
     print('----------------------Training Done------------------------------')
     print("Validation results:", val_results)
-    best_model = np.argmin(val_results)
+    best_model = np.argmax(val_results)
     print("Best model:", best_model)
 
     # load and test best model 10x
@@ -200,3 +200,4 @@ if __name__ == '__main__':
 
     print("Total Time to Train: %f" % total_time)
     print("Average Time: %f" % (total_time / len(train_kingdoms)))
+    print("model id", model_id)

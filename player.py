@@ -13,6 +13,7 @@ class Player:
         self.hand = []
         self.deck = [Card(0), Card(0), Card(0), Card(0), Card(0), Card(0), Card(0), Card(3), Card(3), Card(3)]
         self.discard = []
+        self.in_play = []
 
         random.shuffle(self.deck)
 
@@ -38,11 +39,18 @@ class Player:
 
     def clean_up(self):
         self.discard += self.hand
+        self.discard += self.in_play
         self.hand = []
+        self.in_play = []
         self.draw(5)
 
     def num_coins(self):
-        coins = sum(card.coin_value for card in self.hand if card.f_treasure)
+        coins = 0
+        for card in self.hand:
+            if card.f_treasure:
+                coins += card.coin_value
+                self.in_play.append(card)
+        self.hand = [c for c in self.hand if not c.f_treasure]
         return coins
 
     '''
@@ -65,6 +73,11 @@ class Player:
     Prints deck and hand
     '''
     def print_state(self):
+        pinplay = []
+        for card in self.in_play:
+            pinplay.append(card.name)
+        print("In Play:", pinplay)
+
         pdeck = []
         for card in self.deck:
             pdeck.append(card.name)

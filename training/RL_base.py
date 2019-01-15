@@ -153,7 +153,7 @@ class RL_base():
                 # Agent's turn
                 self.agent.action_phase()
 
-                # TODO extend over multiple buys
+                # should extend over multiple buys
                 card_to_purchase = self.get_agent_buy_policy()
 
                 # Take the action and update q vals
@@ -298,7 +298,7 @@ class RL_base():
 
         # While not reached goal state
         while self.at_goal_state() == -1:
-            if whose_turn != starting_player:
+            if whose_turn == starting_player:
                 self.kingdom.next_turn()
 
             if whose_turn == 1:
@@ -324,4 +324,17 @@ class RL_base():
         test_output_full_file.write('--------------------------------------------\n')
         test_output_full_file.flush()
 
-        return player_vp > opp_vp, self.kingdom.turn_num, player_vp, opp_vp
+        player_won = player_vp > opp_vp
+        if player_vp == opp_vp:
+            if whose_turn == starting_player:
+                # Tie game, both players had equal number of turns
+                player_won = 0
+            else:
+                if starting_player == 1:
+                    # Agent had an extra turn, so loses
+                    player_won = 0
+                else:
+                    # Opponent had extra turn, so agent wins
+                    player_won = 1
+
+        return player_won, self.kingdom.turn_num, player_vp, opp_vp
