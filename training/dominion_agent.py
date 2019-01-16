@@ -133,6 +133,23 @@ class Dominion_Agent(Player):
         # should return list of cards when multiple buys
         return max_action
 
+    def action_phase(self):
+        actions_remaining = 1
+
+        action_cards = [card for card in self.hand if card.f_action]
+
+        self.print_state()
+
+        while actions_remaining > 0 and len(action_cards) > 0:
+            # Currently just plays in order
+            card_to_play = action_cards.pop()
+            self.hand.remove(card_to_play)
+            self.in_play.append(card_to_play)
+            card_to_play.play(self)
+            actions_remaining -= 1
+
+        self.print_state()
+
     def save_model(self, checkpoint_filename):
         torch.save(self.model.state_dict(), checkpoint_filename)
         print("Saved model to " + checkpoint_filename)

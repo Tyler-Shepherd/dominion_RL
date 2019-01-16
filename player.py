@@ -39,12 +39,14 @@ class Player:
         return cards_drawn
 
     def clean_up(self):
+        self.print_state()
         self.discard += self.hand
         self.discard += self.in_play
         self.hand = []
         self.in_play = []
         self.coins = 0
         self.draw(5)
+        self.print_state()
 
     def num_coins(self):
         for card in self.hand:
