@@ -14,6 +14,7 @@ class Player:
         self.deck = [Card(0), Card(0), Card(0), Card(0), Card(0), Card(0), Card(0), Card(3), Card(3), Card(3)]
         self.discard = []
         self.in_play = []
+        self.coins = 0
 
         random.shuffle(self.deck)
 
@@ -42,16 +43,16 @@ class Player:
         self.discard += self.in_play
         self.hand = []
         self.in_play = []
+        self.coins = 0
         self.draw(5)
 
     def num_coins(self):
-        coins = 0
         for card in self.hand:
             if card.f_treasure:
-                coins += card.coin_value
+                self.coins += card.coin_value
                 self.in_play.append(card)
         self.hand = [c for c in self.hand if not c.f_treasure]
-        return coins
+        return self.coins
 
     '''
     Returns num victory points in entire deck

@@ -10,9 +10,9 @@ num_epochs = 1000
 num_training_iterations = 1
 test_on_val_every_epochs = 50
 
-learning_rate = 0.0001
+learning_rate = 0.01
 
-f_learning_rate_decay = 1
+f_learning_rate_decay = 0
 learning_rate_start = 0.4
 learning_rate_end = 0.0001
 learning_rate_decay = 200000

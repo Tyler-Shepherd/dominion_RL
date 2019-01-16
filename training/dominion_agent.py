@@ -71,7 +71,7 @@ class Dominion_Agent(Player):
         # who was starting player
 
         f = []
-        f.append(self.num_coins())
+        f.append(self.coins)
         f.append(a.cost)
         f.append(2 * int(a.f_victory) - 1)
         f.append(2 * int(a.f_treasure) - 1)

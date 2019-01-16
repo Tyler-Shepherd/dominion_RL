@@ -78,6 +78,9 @@ class RL_base():
         self.agent.reset_game()
         self.opponent.reset_game()
 
+        self.previous_experience = None
+        self.current_experience = None
+
         if params.debug_mode >= 3:
             print("Turn", self.kingdom.turn_num)
 
@@ -126,7 +129,7 @@ class RL_base():
 
         assert a is not None
 
-        return a
+        return a, legal_actions
 
     '''
     Plays a single game, recording experiences
@@ -154,10 +157,10 @@ class RL_base():
                 self.agent.action_phase()
 
                 # should extend over multiple buys
-                card_to_purchase = self.get_agent_buy_policy()
+                card_to_purchase, purchasable_cards = self.get_agent_buy_policy()
 
                 # Take the action and update q vals
-                self.agent_purchase(card_to_purchase)
+                self.agent_purchase(card_to_purchase, purchasable_cards)
 
                 self.agent.clean_up()
 
@@ -196,11 +199,11 @@ class RL_base():
     '''
     Has agent purchase card a, saves experience in replay buffer
     '''
-    def agent_purchase(self, a):
+    def agent_purchase(self, a, legal_actions):
         # Experience of form [state,action,reward,next_state,done,next_legal_actions]
         if self.previous_experience is not None:
             # Add legal actions to the experience from two steps ago
-            self.previous_experience.append(self.agent.get_legal_actions())
+            self.previous_experience.append(legal_actions)
             self.buffer.add([self.previous_experience.copy()])
         if self.current_experience is not None:
             # Add next_state to the previous experience before starting new experience
@@ -234,6 +237,7 @@ class RL_base():
 
         for s in samples:
             #[state, action, reward, next_state, done, next_legal_actions]
+            assert len(s) == 6
             state = s[0]
             action = s[1]
             reward = s[2]
@@ -306,7 +310,7 @@ class RL_base():
                 self.agent.action_phase()
                 bought_card = self.agent.buy_phase()
 
-                test_output_full_file.write(str(self.kingdom.turn_num) + '\t' + str(self.agent.num_coins()) + '\t' + str(bought_card.name) + '\n')
+                test_output_full_file.write(str(self.kingdom.turn_num) + '\t' + str(self.agent.coins) + '\t' + str(bought_card.name) + '\n')
 
                 self.agent.clean_up()
             else:
