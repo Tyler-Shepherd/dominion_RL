@@ -81,8 +81,8 @@ class RL_base():
         self.previous_experience = None
         self.current_experience = None
 
-        if params.debug_mode >= 3:
-            print("Turn", self.kingdom.turn_num)
+        if params.debug_mode >= 2:
+            print("New Game")
 
     '''
     Returns -1 if not at goal state (game not over)

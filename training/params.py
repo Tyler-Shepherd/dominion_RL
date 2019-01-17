@@ -10,7 +10,7 @@ num_epochs = 1000
 num_training_iterations = 1
 test_on_val_every_epochs = 50
 
-learning_rate = 0.01
+learning_rate = 0.1
 
 f_learning_rate_decay = 0
 learning_rate_start = 0.4
@@ -22,7 +22,7 @@ discount_factor = 0.95
 # Boltzmann Exploration Parameters
 tau_start = 1.0
 tau_end = 0.05
-tau_decay = 100000
+tau_decay = 1000000
 
 # Updates every x experience replay trainings
 update_target_network_every = 2
@@ -34,7 +34,7 @@ buffer_size = 500
 unusual_sample_factor = 0.9
 batch_size = 50
 
-D_in = 6
+D_in = 7
 H = 10
 D_out = 1
 

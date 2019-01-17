@@ -65,9 +65,11 @@ class Player:
         return vp_deck + vp_discard + vp_hand
 
     def action_phase(self):
+        assert 1==2 # this shouldn't be called, should be implemented in child classes
         pass
 
     def buy_phase(self):
+        assert 1==2 # this shouldn't be called, should be implemented in child classes
         pass
 
     '''

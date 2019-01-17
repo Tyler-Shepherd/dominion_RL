@@ -1,3 +1,5 @@
+import training.params as params
+
 # Card ids:
 # 0 Copper
 # 1 Silver
@@ -69,6 +71,9 @@ class Card:
             self.name = "Smithy"
 
     def play(self, player):
+        if params.debug_mode >= 2:
+            print("Playing", self.name)
+
         if self.id == 6:
             # Smithy
             player.draw(3)

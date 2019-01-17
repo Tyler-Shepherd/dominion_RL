@@ -73,6 +73,7 @@ class Dominion_Agent(Player):
         f = []
         f.append(self.coins)
         f.append(a.cost)
+        f.append(self.coins - a.cost)
         f.append(2 * int(a.f_victory) - 1)
         f.append(2 * int(a.f_treasure) - 1)
         f.append(2 * int(a.f_action) - 1)
@@ -119,6 +120,9 @@ class Dominion_Agent(Player):
         max_action_val = float("-inf")
         for e in legal_actions:
             action_val = self.get_Q_val(e)
+
+            if params.debug_mode >= 3:
+                print(e.name, action_val.item())
 
             if action_val > max_action_val:
                 max_action = e
