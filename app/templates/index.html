@@ -1,14 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+
+<html lang="en" ng-app="DominionAI">
 <head>
     <meta charset="UTF-8">
     <title>Dominion RL</title>
 </head>
-<body>
+<body ng-controller="DominionAIController">
 Play the AI
 
-<form action="buy" method="post">
-    <input name="to_buy">
+<form role="form" ng-submit="buyCard()">
+    <input type="text" name="to_buy" class="form-control" ng-model="to_buy">
     <input type="submit" name="Submit">
 </form>
 

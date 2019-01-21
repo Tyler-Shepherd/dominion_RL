@@ -9,20 +9,7 @@ from training.RL_base import RL_base
 from training.dominion_agent import Dominion_Agent
 from training.opponents.buy_only_treasure import Buy_Only_Treasure_Opponent
 from kingdom import Kingdom
-
-def generate_kingdom():
-    max_card_id = 6
-    new_kingdom = {0: 30, 1: 30, 2: 30, 3: 8, 4: 8, 5: 8}
-
-    # TODO eventually need to randomly select 10 cards for the kingdom
-    for i in range(6, max_card_id+1):
-        if random.random() < 0.5:
-            new_kingdom[i] = 10
-        else:
-            new_kingdom[i] = 0
-
-    return Kingdom(new_kingdom)
-
+import dominion_utils
 
 def test_model(test_output_file, test_output_full_file, base, test_kingdoms, num_times_tested, val_testing):
     # Test the agents learned model
@@ -73,13 +60,13 @@ if __name__ == '__main__':
     # Make the kingdoms
     train_kingdoms = []
     for i in range(params.num_train_kingdoms):
-        train_kingdoms.append(generate_kingdom())
+        train_kingdoms.append(dominion_utils.generate_kingdom())
     test_kingdoms = []
     for i in range(params.num_test_kingdoms):
-        test_kingdoms.append(generate_kingdom())
+        test_kingdoms.append(dominion_utils.generate_kingdom())
     val_kingdoms = []
     for i in range(params.num_val_kingdoms):
-        val_kingdoms.append(generate_kingdom())
+        val_kingdoms.append(dominion_utils.generate_kingdom())
 
     # Identifying id for this run
     model_id = random.randint(0, 1000000000)

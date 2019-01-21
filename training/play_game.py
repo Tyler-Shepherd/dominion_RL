@@ -10,12 +10,12 @@ if __name__ == '__main__':
     base = RL_base(agent)
 
     model_file = "C:\\Users\\shepht2\\Documents\\Computer Science\\Dominion\\dominion_RL\\training\\results\\"
-    model_file += "595665694_val_0.pth.tar"
+    model_file += "1-15-19\\899647092_val_14.pth.tar"
     agent.load_model(model_file)
 
     dominion_utils.print_feature_weights(agent.model)
 
-    kingdom = Kingdom({0: 30, 1: 30, 2: 30, 3: 8, 4: 8, 5: 8, 6: 0})
+    kingdom = Kingdom({0: 30, 1: 30, 2: 30, 3: 8, 4: 8, 5: 8, 6: 10})
     opponent = Buy_Only_Treasure_Opponent()
 
     params.debug_mode = 3

@@ -34,7 +34,7 @@ buffer_size = 500
 unusual_sample_factor = 0.9
 batch_size = 50
 
-D_in = 7
+D_in = 6
 H = 10
 D_out = 1
 

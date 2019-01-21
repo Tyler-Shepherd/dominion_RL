@@ -1,5 +1,4 @@
 import copy
-import sys
 
 import torch
 import numpy as np
@@ -9,8 +8,6 @@ from card import Card
 from player import Player
 from training import params as params
 import dominion_utils
-
-from training.opponents.buy_only_treasure import Buy_Only_Treasure_Opponent
 
 class Dominion_Agent(Player):
     def __init__(self, loss_output_file):
@@ -73,7 +70,7 @@ class Dominion_Agent(Player):
         f = []
         f.append(self.coins)
         f.append(a.cost)
-        f.append(self.coins - a.cost)
+        # f.append(self.coins - a.cost)
         f.append(2 * int(a.f_victory) - 1)
         f.append(2 * int(a.f_treasure) - 1)
         f.append(2 * int(a.f_action) - 1)
