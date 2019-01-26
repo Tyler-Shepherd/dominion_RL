@@ -9,12 +9,46 @@
     <title>Dominion RL</title>
 </head>
 <body ng-controller="DominionAIController">
-Play the AI
+<!--<div>AI hand:-->
+    <!--<span ng-bind="ai_hand"></span>-->
+<!--</div>-->
+<!--<div> AI deck:-->
+    <!--<span ng-bind="ai_deck"></span>-->
+<!--</div>-->
 
-<form role="form" ng-submit="buyCard()">
-    <input type="text" name="to_buy" class="form-control" ng-model="to_buy">
-    <input type="submit" name="Submit">
-</form>
+<div>
+    <div>Turn <span ng-bind="turn_num"></span></div>
+
+    <div>Kingdom <span ng-bind="kingdom"></span></div>
+</div>
+
+<div>Log:
+    <span ng-bind="play_log"></span>
+</div>
+
+<div>
+    <span ng-if="play_phase === 0">Not Your Turn</span>
+    <span ng-if="play_phase === 1">Action Phase</span>
+    <span ng-if="play_phase === 2">Buy Phase</span>
+</div>
+
+<div>Hand:
+    <span ng-bind="person_hand"></span>
+</div>
+
+<button ng-if="gameNotStarted" ng-click="startGame()">Start Game</button>
+<button ng-if="play_phase === 1" ng-click="endActionPhase()">End Action Phase</button>
+
+<div ng-if="play_phase === 2">
+    Purchaseable:
+    <span ng-bind="purchaseable_cards"></span>
+    <div ng-repeat="card in purchaseable_cards">{{card}}</div>
+</div>
+
+<!--<form role="form" ng-submit="buyCard()">-->
+    <!--<input type="text" name="to_buy" class="form-control" ng-model="to_buy">-->
+    <!--<input type="submit" name="Submit">-->
+<!--</form>-->
 
 </body>
 </html>

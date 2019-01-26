@@ -1,6 +1,6 @@
 from flask import Flask
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, url_for
+    Blueprint, flash, g, redirect, render_template, request, session, url_for, Response
 )
 import sys
 import json
@@ -15,12 +15,8 @@ from person import Person
 
 app = Flask(__name__)
 
-kingdom = dominion_utils.generate_kingdom()
-kingdom.reset()
-
-person = Person()
-person.initialize(kingdom)
-person.reset_game()
+kingdom = None
+person = None
 
 # export FLASK_APP=app.py
 # flask run
@@ -42,6 +38,31 @@ def buy():
     person.clean_up()
 
     return ''
+
+@app.route('/start_game', methods=['GET'])
+def start_game():
+    global kingdom, person
+    kingdom = dominion_utils.generate_kingdom()
+    kingdom.reset()
+
+    person = Person()
+    person.initialize(kingdom)
+    person.reset_game()
+
+    data = {"turn": kingdom.turn_num, "hand": dominion_utils.cards_to_string(person.hand), "kingdom": dominion_utils.kingdom_to_string(kingdom)}
+    data = json.dumps(data)
+    resp = Response(data, status=200, mimetype='application/json')
+    return resp
+
+@app.route('/get_purchaseable_cards', methods=['GET'])
+def get_purchaseable_cards():
+    global kingdom, person
+    purchaseable_cards = dominion_utils.cards_to_string(dominion_utils.get_purchaseable_cards(person.num_coins(), kingdom))
+
+    app.logger.info("purchaseable: %s", str(purchaseable_cards))
+
+    resp = Response(json.dumps(purchaseable_cards), status=200, mimetype='application/json')
+    return resp
 
 if __name__ == '__main__':
     app.run(port=5000,debug=True)

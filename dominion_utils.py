@@ -1,4 +1,5 @@
 import training.params as params
+from card import Card
 import numpy as np
 import random
 from kingdom import Kingdom
@@ -50,7 +51,6 @@ def print_feature_weights(model_full):
     for i in sum_weights_from_node_to_output[0]:
         print(i[0])
 
-
 def generate_kingdom():
     max_card_id = 6
     new_kingdom = {0: 30, 1: 30, 2: 30, 3: 8, 4: 8, 5: 8}
@@ -63,3 +63,28 @@ def generate_kingdom():
             new_kingdom[i] = 0
 
     return Kingdom(new_kingdom)
+
+def cards_to_string(cards):
+    c_str = []
+    for card in cards:
+        c_str.append(card.name)
+    return c_str
+
+def get_purchaseable_cards(num_coins, kingdom):
+    cards_purchasable = []
+
+    for c in kingdom.supply.keys():
+        card = Card(c)
+        if card.cost <= num_coins and kingdom.supply[c] > 0:
+            cards_purchasable.append(card)
+
+    return cards_purchasable
+
+def kingdom_to_string(kingdom):
+    k_str = ""
+    for c,v in kingdom.supply.items():
+        card = Card(c)
+
+        k_str += card.name + ": " + str(v) + "   "
+
+    return k_str
