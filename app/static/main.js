@@ -1,26 +1,31 @@
-angular.module('DominionAI', [])
+var app = angular.module('DominionAI', []);
 
-.controller('DominionAIController', ['$scope', '$log', '$http',
-  function($scope, $log, $http) {
+app.config(['$interpolateProvider', function($interpolateProvider) {
+  $interpolateProvider.startSymbol('{[');
+  $interpolateProvider.endSymbol(']}');
+}]);
 
-//  $scope.ai_hand = "heyyyyyyy";
-//  $scope.ai_deck = "hmmmmmm";
-  $scope.play_log = "Press to Start";
-  $scope.turn_num = -1;
-  $scope.person_hand = "";
-  $scope.kingdom = "";
+app.controller('DominionAIController', ['$log', '$http',
+  function($log, $http) {
 
-  $scope.purchaseable_cards = []
+  var ctrl = this;
 
-  $scope.gameNotStarted = true;
+  ctrl.play_log = "Press to Start";
+  ctrl.turn_num = -1;
+  ctrl.person_hand = "";
+  ctrl.kingdom = "";
+
+  ctrl.purchaseable_cards = ["hello", "goodbye"];
+
+  ctrl.gameNotStarted = true;
 
   // play_phase = 0: not person turn
   // play_phase = 1: action phase
   // play_phase = 2: buy phase
-  $scope.play_phase = 0;
+  ctrl.play_phase = 0;
 
-  $scope.buyCard = function() {
-    var card_to_buy = $scope.to_buy;
+  ctrl.buyCard = function() {
+    var card_to_buy = ctrl.to_buy;
 
     $log.log("Buying " + card_to_buy);
 
@@ -33,30 +38,33 @@ angular.module('DominionAI', [])
       });
   };
 
-  $scope.startGame = function() {
+  ctrl.startGame = function() {
     $log.log("Starting Game");
-    $scope.play_log = "Game Started";
+    ctrl.play_log = "Game Started";
 
     $http.get('/start_game').then(function(response) {
         $log.log(response);
 
-        $scope.gameNotStarted = false;
-        $scope.play_phase = 1;
-        $scope.turn_num = response.data.turn;
-        $scope.person_hand = response.data.hand;
-        $scope.kingdom = response.data.kingdom;
+        ctrl.gameNotStarted = false;
+        ctrl.play_phase = 1;
+        ctrl.turn_num = response.data.turn;
+        ctrl.person_hand = response.data.hand;
+        ctrl.kingdom = response.data.kingdom;
         });
   };
 
-  $scope.endActionPhase = function() {
-    $scope.play_phase = 2;
+  ctrl.endActionPhase = function() {
+    ctrl.play_phase = 2;
 
     $http.get('/get_purchaseable_cards').then(function(response) {
         $log.log(response);
 
         // TODO: need a better return type that gives card id and name
         // then put into an array of objects for ng-repeat with .name key
-        $scope.purchaseable_cards = response.data;
+        ctrl.purchaseable_cards = response.data;
+
+        $log.log('purchaseable:');
+        $log.log(ctrl.purchaseable_cards);
     });
   };
 }

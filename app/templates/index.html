@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 
-<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
-<script src="{{ url_for('static', filename='main.js') }}"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular.min.js"></script>
+<script src="static/main.js"></script>
 
 <html lang="en" ng-app="DominionAI">
 <head>
     <meta charset="UTF-8">
     <title>Dominion RL</title>
 </head>
-<body ng-controller="DominionAIController">
+<body ng-controller="DominionAIController as ctrl">
 <!--<div>AI hand:-->
     <!--<span ng-bind="ai_hand"></span>-->
 <!--</div>-->
@@ -17,32 +17,30 @@
 <!--</div>-->
 
 <div>
-    <div>Turn <span ng-bind="turn_num"></span></div>
+    <div>Turn <span ng-bind="ctrl.turn_num"></span></div>
 
-    <div>Kingdom <span ng-bind="kingdom"></span></div>
+    <div>Kingdom <span ng-bind="ctrl.kingdom"></span></div>
 </div>
 
 <div>Log:
-    <span ng-bind="play_log"></span>
+    <span ng-bind="ctrl.play_log"></span>
 </div>
 
 <div>
-    <span ng-if="play_phase === 0">Not Your Turn</span>
-    <span ng-if="play_phase === 1">Action Phase</span>
-    <span ng-if="play_phase === 2">Buy Phase</span>
+    <span ng-if="ctrl.play_phase === 0">Not Your Turn</span>
+    <span ng-if="ctrl.play_phase === 1">Action Phase</span>
+    <span ng-if="ctrl.play_phase === 2">Buy Phase</span>
 </div>
 
 <div>Hand:
-    <span ng-bind="person_hand"></span>
+    <span ng-bind="ctrl.person_hand"></span>
 </div>
 
-<button ng-if="gameNotStarted" ng-click="startGame()">Start Game</button>
-<button ng-if="play_phase === 1" ng-click="endActionPhase()">End Action Phase</button>
-
-<div ng-if="play_phase === 2">
+<button ng-if="ctrl.gameNotStarted" ng-click="ctrl.startGame()">Start Game</button>
+<button ng-if="ctrl.play_phase === 1" ng-click="ctrl.endActionPhase()">End Action Phase</button>
+<div ng-if="ctrl.play_phase === 2">
     Purchaseable:
-    <span ng-bind="purchaseable_cards"></span>
-    <div ng-repeat="card in purchaseable_cards">{{card}}</div>
+    <button ng-repeat="card in ctrl.purchaseable_cards">{[card.name]}</button>
 </div>
 
 <!--<form role="form" ng-submit="buyCard()">-->

@@ -57,11 +57,12 @@ def start_game():
 @app.route('/get_purchaseable_cards', methods=['GET'])
 def get_purchaseable_cards():
     global kingdom, person
-    purchaseable_cards = dominion_utils.cards_to_string(dominion_utils.get_purchaseable_cards(person.num_coins(), kingdom))
+    purchaseable_cards = dominion_utils.get_purchaseable_cards(person.num_coins(), kingdom)
+    purchaseable_cards_data = [{'name': c.name, 'id': c.id} for c in purchaseable_cards]
 
-    app.logger.info("purchaseable: %s", str(purchaseable_cards))
+    app.logger.info("purchaseable: %s", str(purchaseable_cards_data))
 
-    resp = Response(json.dumps(purchaseable_cards), status=200, mimetype='application/json')
+    resp = Response(json.dumps(purchaseable_cards_data), status=200, mimetype='application/json')
     return resp
 
 if __name__ == '__main__':
