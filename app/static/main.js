@@ -15,27 +15,54 @@ app.controller('DominionAIController', ['$log', '$http',
   ctrl.person_hand = "";
   ctrl.kingdom = "";
 
-  ctrl.purchaseable_cards = ["hello", "goodbye"];
+  ctrl.action_cards = [];
+
+  ctrl.purchaseable_cards = [];
+  ctrl.num_buys = 1;
 
   ctrl.gameNotStarted = true;
+  ctrl.gameOver = false;
 
   // play_phase = 0: not person turn
   // play_phase = 1: action phase
   // play_phase = 2: buy phase
   ctrl.play_phase = 0;
 
-  ctrl.buyCard = function() {
-    var card_to_buy = ctrl.to_buy;
-
+  ctrl.buyCard = function(card_to_buy) {
     $log.log("Buying " + card_to_buy);
 
-    $http.post('/buy', {"to_buy": card_to_buy}).
-      success(function(results) {
-        $log.log(results);
-      }).
-      error(function(error) {
+    $http.post('/buy', {"to_buy": card_to_buy})
+      .then(function(response) {
+        $log.log(response);
+        ctrl.num_buys -= 1;
+        ctrl.kingdom = response.data.kingdom;
+      })
+      .catch(function(error) {
         $log.log(error);
       });
+  };
+
+  ctrl.endTurn = function() {
+    $http.get('/end_turn').then(function(response) {
+        $log.log(response);
+
+        if(response.data.game_over) {
+            ctrl.gameOver = true;
+            ctrl.play_phase = -1;
+        }
+        else {
+            ctrl.play_phase = 1;
+            $http.get('/get_action_cards').then(function(response) {
+                $log.log(response);
+                ctrl.action_cards = response.data;
+                ctrl.num_actions = 1;
+            });
+        }
+
+        ctrl.turn_num = response.data.turn;
+        ctrl.person_hand = response.data.hand;
+        ctrl.kingdom = response.data.kingdom;
+    });
   };
 
   ctrl.startGame = function() {
@@ -50,6 +77,11 @@ app.controller('DominionAIController', ['$log', '$http',
         ctrl.turn_num = response.data.turn;
         ctrl.person_hand = response.data.hand;
         ctrl.kingdom = response.data.kingdom;
+        $http.get('/get_action_cards').then(function(response) {
+                $log.log(response);
+                ctrl.action_cards = response.data;
+                ctrl.num_actions = 1;
+            });
         });
   };
 
@@ -58,10 +90,8 @@ app.controller('DominionAIController', ['$log', '$http',
 
     $http.get('/get_purchaseable_cards').then(function(response) {
         $log.log(response);
-
-        // TODO: need a better return type that gives card id and name
-        // then put into an array of objects for ng-repeat with .name key
         ctrl.purchaseable_cards = response.data;
+        ctrl.num_buys = 1;
 
         $log.log('purchaseable:');
         $log.log(ctrl.purchaseable_cards);

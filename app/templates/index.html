@@ -19,7 +19,7 @@
 <div>
     <div>Turn <span ng-bind="ctrl.turn_num"></span></div>
 
-    <div>Kingdom <span ng-bind="ctrl.kingdom"></span></div>
+    <div>Kingdom: <span ng-bind="ctrl.kingdom"></span></div>
 </div>
 
 <div>Log:
@@ -36,11 +36,33 @@
     <span ng-bind="ctrl.person_hand"></span>
 </div>
 
+<div ng-if="ctrl.gameOver">Game Over!</div>
 <button ng-if="ctrl.gameNotStarted" ng-click="ctrl.startGame()">Start Game</button>
-<button ng-if="ctrl.play_phase === 1" ng-click="ctrl.endActionPhase()">End Action Phase</button>
+
+<div ng-if="ctrl.play_phase === 1">
+    <div>Num Actions: <span ng-bind="ctrl.num_actions"></span></div>
+
+    <div ng-if="ctrl.num_actions > 0">
+        Action Cards:
+        <span ng-repeat="card in ctrl.action_cards" >
+            <button ng-click="ctrl.playCard(card.id)">{[card.name]}</button>
+        </span>
+    </div>
+
+    <button ng-click="ctrl.endActionPhase()">End Action Phase</button>
+</div>
+
 <div ng-if="ctrl.play_phase === 2">
-    Purchaseable:
-    <button ng-repeat="card in ctrl.purchaseable_cards">{[card.name]}</button>
+    <div>Num Buys: <span ng-bind="ctrl.num_buys"></span></div>
+
+    <div ng-if="ctrl.num_buys > 0">
+        Purchaseable:
+        <span ng-repeat="card in ctrl.purchaseable_cards" >
+            <button ng-click="ctrl.buyCard(card.id)">{[card.name]}</button>
+        </span>
+    </div>
+
+    <button ng-click="ctrl.endTurn()">End Turn</button>
 </div>
 
 <!--<form role="form" ng-submit="buyCard()">-->
