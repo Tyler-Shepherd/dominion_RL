@@ -9,28 +9,29 @@
     <title>Dominion RL</title>
 </head>
 <body ng-controller="DominionAIController as ctrl">
-<!--<div>AI hand:-->
-    <!--<span ng-bind="ai_hand"></span>-->
-<!--</div>-->
-<!--<div> AI deck:-->
-    <!--<span ng-bind="ai_deck"></span>-->
-<!--</div>-->
 
 <div>
-    <div>Turn <span ng-bind="ctrl.turn_num"></span></div>
+    <h1>Turn <span ng-bind="ctrl.turn_num"></span></h1>
 
     <div>Kingdom: <span ng-bind="ctrl.kingdom"></span></div>
 </div>
+
+<br>
 
 <div>Log:
     <span ng-bind="ctrl.play_log"></span>
 </div>
 
+<br>
+
 <div>
-    <span ng-if="ctrl.play_phase === 0">Not Your Turn</span>
-    <span ng-if="ctrl.play_phase === 1">Action Phase</span>
-    <span ng-if="ctrl.play_phase === 2">Buy Phase</span>
+    <h2 ng-if="ctrl.play_phase === -1">Opponent Action Phase</h2>
+    <h2 ng-if="ctrl.play_phase === -2">Opponent Buy Phase</h2>
+    <h2 ng-if="ctrl.play_phase === 1">Action Phase</h2>
+    <h2 ng-if="ctrl.play_phase === 2">Buy Phase</h2>
 </div>
+
+<br>
 
 <div>Hand:
     <span ng-bind="ctrl.person_hand"></span>
@@ -39,8 +40,38 @@
 <div ng-if="ctrl.gameOver">Game Over!</div>
 <button ng-if="ctrl.gameNotStarted" ng-click="ctrl.startGame()">Start Game</button>
 
+<div ng-if="ctrl.play_phase === -1">
+    <h3>Num Actions: <span ng-bind="ctrl.num_actions"></span></h3>
+
+    <div ng-if="ctrl.num_actions > 0">
+        Action Cards:
+        <span ng-repeat="card in ctrl.action_cards" >
+            {[card.name]}
+        </span>
+    </div>
+
+    <br>
+
+    <button ng-click="ctrl.agentNext()">Next</button>
+</div>
+
+<div ng-if="ctrl.play_phase === -2">
+    <h3>Num Buys: <span ng-bind="ctrl.num_buys"></span></h3>
+
+    <div ng-if="ctrl.num_buys > 0">
+        Purchaseable:
+        <span ng-repeat="card in ctrl.purchaseable_cards" >
+            {[card.name]}
+        </span>
+    </div>
+
+    <br>
+
+    <button ng-click="ctrl.agentNext()">Next</button>
+</div>
+
 <div ng-if="ctrl.play_phase === 1">
-    <div>Num Actions: <span ng-bind="ctrl.num_actions"></span></div>
+    <h3>Num Actions: <span ng-bind="ctrl.num_actions"></span></h3>
 
     <div ng-if="ctrl.num_actions > 0">
         Action Cards:
@@ -49,11 +80,13 @@
         </span>
     </div>
 
+    <br>
+
     <button ng-click="ctrl.endActionPhase()">End Action Phase</button>
 </div>
 
 <div ng-if="ctrl.play_phase === 2">
-    <div>Num Buys: <span ng-bind="ctrl.num_buys"></span></div>
+    <h3>Num Buys: <span ng-bind="ctrl.num_buys"></span></h3>
 
     <div ng-if="ctrl.num_buys > 0">
         Purchaseable:
@@ -62,13 +95,10 @@
         </span>
     </div>
 
+    <br>
+
     <button ng-click="ctrl.endTurn()">End Turn</button>
 </div>
-
-<!--<form role="form" ng-submit="buyCard()">-->
-    <!--<input type="text" name="to_buy" class="form-control" ng-model="to_buy">-->
-    <!--<input type="submit" name="Submit">-->
-<!--</form>-->
 
 </body>
 </html>

@@ -23,9 +23,11 @@ app.controller('DominionAIController', ['$log', '$http',
   ctrl.gameNotStarted = true;
   ctrl.gameOver = false;
 
-  // play_phase = 0: not person turn
-  // play_phase = 1: action phase
-  // play_phase = 2: buy phase
+  // play_phase = -2: agent buy phase
+  // play_phase = -1: agent action phase
+  // play_phase = 0: nobody's turn
+  // play_phase = 1: player action phase
+  // play_phase = 2: player buy phase
   ctrl.play_phase = 0;
 
   ctrl.buyCard = function(card_to_buy) {
@@ -36,6 +38,22 @@ app.controller('DominionAIController', ['$log', '$http',
         $log.log(response);
         ctrl.num_buys -= 1;
         ctrl.kingdom = response.data.kingdom;
+      })
+      .catch(function(error) {
+        $log.log(error);
+      });
+  };
+
+   ctrl.playCard = function(card_to_play) {
+    $log.log("Playing " + card_to_play);
+
+    $http.post('/play_action_card', {"to_play": card_to_play})
+      .then(function(response) {
+        $log.log(response);
+        ctrl.num_actions -= 1;
+        ctrl.kingdom = response.data.kingdom;
+        ctrl.action_cards = response.data.action_cards;
+        ctrl.person_hand = response.data.hand;
       })
       .catch(function(error) {
         $log.log(error);
@@ -73,16 +91,16 @@ app.controller('DominionAIController', ['$log', '$http',
         $log.log(response);
 
         ctrl.gameNotStarted = false;
-        ctrl.play_phase = 1;
+        ctrl.play_phase = response.data.play_phase;
         ctrl.turn_num = response.data.turn;
         ctrl.person_hand = response.data.hand;
         ctrl.kingdom = response.data.kingdom;
         $http.get('/get_action_cards').then(function(response) {
-                $log.log(response);
-                ctrl.action_cards = response.data;
-                ctrl.num_actions = 1;
-            });
+            $log.log(response);
+            ctrl.action_cards = response.data;
+            ctrl.num_actions = 1;
         });
+    });
   };
 
   ctrl.endActionPhase = function() {
