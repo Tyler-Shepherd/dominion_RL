@@ -80,7 +80,7 @@ def end_turn():
     game_over = False
     if kingdom.is_game_over() != -1:
         game_over = True
-    else:
+    elif starting_player == -1:
         kingdom.next_turn()
 
     data = {"turn": kingdom.turn_num, "hand": dominion_utils.cards_to_string(person.hand),
@@ -88,6 +88,37 @@ def end_turn():
     data = json.dumps(data)
     resp = Response(data, status=200, mimetype='application/json')
     return resp
+
+@app.route('/end_agent_turn', methods=['GET'])
+def end_agent_turn():
+    global kingdom, person, agent, starting_player
+    agent.clean_up()
+    print("Agent state:")
+    agent.print_state()
+
+    game_over = False
+    if kingdom.is_game_over() != -1:
+        game_over = True
+    elif starting_player == 1:
+        kingdom.next_turn()
+
+    data = {"turn": kingdom.turn_num, "hand": dominion_utils.cards_to_string(person.hand),
+            "kingdom": dominion_utils.kingdom_to_string(kingdom), "game_over": game_over}
+    data = json.dumps(data)
+    resp = Response(data, status=200, mimetype='application/json')
+    return resp
+
+@app.route('/get_agent_buy', methods=['GET'])
+def get_agent_buy():
+    global kingdom, person, agent
+
+    bought_card = agent.buy_phase()
+
+    data = {"kingdom": dominion_utils.kingdom_to_string(kingdom), "bought_card": bought_card.name}
+    data = json.dumps(data)
+    resp = Response(data, status=200, mimetype='application/json')
+    return resp
+
 
 @app.route('/start_game', methods=['GET'])
 def start_game():

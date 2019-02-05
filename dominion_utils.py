@@ -1,7 +1,10 @@
-import training.params as params
-from card import Card
 import numpy as np
 import random
+import torch
+from torch.autograd import Variable
+
+import training.params as params
+from card import Card
 from kingdom import Kingdom
 
 def buy_card(player, card, kingdom):
@@ -88,3 +91,24 @@ def kingdom_to_string(kingdom):
         k_str += card.name + ": " + str(v) + "   "
 
     return k_str
+
+# Returns input layer features at given game state buying Card a
+def state_features(num_coins, turn_num, a):
+    # num remaining of each card in kingdom, num of each card in deck
+    # num of each card opponent has, opponent vp total
+    # player vp total
+    # opponent - player vp difference
+    # one-hot vector for a's id
+    # special for if a is Nothing?
+    # who was starting player
+
+    f = []
+    f.append(num_coins)
+    f.append(a.cost)
+    # f.append(self.coins - a.cost)
+    f.append(2 * int(a.f_victory) - 1)
+    f.append(2 * int(a.f_treasure) - 1)
+    f.append(2 * int(a.f_action) - 1)
+    f.append(turn_num)
+
+    return Variable(torch.from_numpy(np.array(f)).float())
