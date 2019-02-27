@@ -5,12 +5,14 @@ from training.opponents.buy_only_treasure import  Buy_Only_Treasure_Opponent
 from kingdom import Kingdom
 import dominion_utils
 
+# Run to play a single game
+# For manual testing purposes
+
 if __name__ == '__main__':
     agent = Dominion_Agent("")
     base = RL_base(agent)
 
-    model_file = "C:\\Users\\shepht2\\Documents\\Computer Science\\Dominion\\dominion_RL\\training\\results\\"
-    model_file += "1-15-19\\899647092_val_14.pth.tar"
+    model_file = "./results/1-15-19/899647092_val_14.pth.tar"
     agent.load_model(model_file)
 
     dominion_utils.print_feature_weights(agent.model)

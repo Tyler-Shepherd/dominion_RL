@@ -2,7 +2,7 @@ import datetime
 
 debug_mode = 0
 
-checkpoint_filename = "C:\\Users\shepht2\Documents\Computer Science\Dominion\dominion_RL\\training\\results\\1-15-19\899647092_val_14.pth.tar"
+checkpoint_filename = "../training/results/1-15-19/899647092_val_14.pth.tar"
 
 num_train_kingdoms = 80
 num_test_kingdoms = 20
