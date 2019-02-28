@@ -134,6 +134,9 @@ def start_game():
     agent.initialize(kingdom)
     agent.reset_game()
 
+    person.opponent = agent
+    agent.opponent = person
+
     # 1 if agent turn
     # -1 if opponent turn
     whose_turn = 1 if random.random() < 0.5 else -1
@@ -147,7 +150,8 @@ def start_game():
 @app.route('/get_purchaseable_cards', methods=['GET'])
 def get_purchaseable_cards():
     global kingdom, person, agent
-    purchaseable_cards = dominion_utils.get_purchaseable_cards(person.num_coins(), kingdom)
+    person.play_treasures()
+    purchaseable_cards = dominion_utils.get_purchaseable_cards(person.coins, kingdom)
     purchaseable_cards_data = [{'name': c.name, 'id': c.id} for c in purchaseable_cards]
 
     app.logger.info("purchaseable: %s", str(purchaseable_cards_data))

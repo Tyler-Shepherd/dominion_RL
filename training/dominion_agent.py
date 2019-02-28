@@ -32,16 +32,11 @@ class Dominion_Agent(Player):
         self.loss_fn = torch.nn.SmoothL1Loss(size_average=False)  # Huber loss
 
     '''
-    Initializes environment for an iteration of learning
-    '''
-    def initialize(self, kingdom):
-        self.kingdom = kingdom
-
-    '''
     Returns all possible cards purchaseable
     '''
     def get_legal_actions(self):
-        coins = self.num_coins()
+        self.play_treasures()
+        coins = self.coins
         if params.debug_mode >= 2:
             print("Agent has", coins, "coins")
 
@@ -57,29 +52,8 @@ class Dominion_Agent(Player):
 
         return cards_purchasable
 
-    # Returns input layer features at current state buying Card a
-    def state_features(self, a):
-        # num remaining of each card in kingdom, num of each card in deck
-        # num of each card opponent has, opponent vp total
-        # player vp total
-        # opponent - player vp difference
-        # one-hot vector for a's id
-        # special for if a is Nothing?
-        # who was starting player
-
-        f = []
-        f.append(self.coins)
-        f.append(a.cost)
-        # f.append(self.coins - a.cost)
-        f.append(2 * int(a.f_victory) - 1)
-        f.append(2 * int(a.f_treasure) - 1)
-        f.append(2 * int(a.f_action) - 1)
-        f.append(self.kingdom.turn_num)
-
-        return Variable(torch.from_numpy(np.array(f)).float())
-
     def get_Q_val(self, a, use_target_net=False):
-        state_features = self.state_features(a)
+        state_features = dominion_utils.state_features(self, self.kingdom, a)
 
         if use_target_net:
             return self.target_model(state_features)
@@ -154,22 +128,4 @@ class Dominion_Agent(Player):
         checkpoint = torch.load(checkpoint_filename)
         self.model.load_state_dict(checkpoint)
         print("Loaded model from " + checkpoint_filename)
-
-    def get_current_state(self):
-        # state is of form [hand, deck, discard, kingdom]
-        current_state = []
-        current_state.append(self.hand.copy())
-        current_state.append(self.deck.copy())
-        current_state.append(self.discard.copy())
-        current_state.append(copy.deepcopy(self.kingdom))
-
-        return current_state
-
-    def set_state(self, new_state):
-        # Note: you can't set state and then continue playing an actual game since opponent won't have Kingdom updated
-        # Only used for getting and updating q values
-        self.hand = new_state[0]
-        self.deck = new_state[1]
-        self.discard = new_state[2]
-        self.kingdom = new_state[3]
 

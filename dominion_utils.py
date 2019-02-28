@@ -93,22 +93,29 @@ def kingdom_to_string(kingdom):
     return k_str
 
 # Returns input layer features at given game state buying Card a
-def state_features(num_coins, turn_num, a):
+def state_features(player, kingdom, a):
     # num remaining of each card in kingdom, num of each card in deck
     # num of each card opponent has, opponent vp total
-    # player vp total
-    # opponent - player vp difference
     # one-hot vector for a's id
     # special for if a is Nothing?
     # who was starting player
 
     f = []
-    f.append(num_coins)
+    f.append(player.coins)
     f.append(a.cost)
-    # f.append(self.coins - a.cost)
+    f.append(player.coins - a.cost)
     f.append(2 * int(a.f_victory) - 1)
     f.append(2 * int(a.f_treasure) - 1)
     f.append(2 * int(a.f_action) - 1)
-    f.append(turn_num)
+    f.append(kingdom.turn_num)
+
+    # player vp total
+    f.append(player.num_victory_points())
+
+    # opponent vp total
+    f.append(player.opponent.num_victory_points())
+
+    # opponent - player vp difference
+    f.append(player.num_victory_points() - player.opponent.num_victory_points())
 
     return Variable(torch.from_numpy(np.array(f)).float())

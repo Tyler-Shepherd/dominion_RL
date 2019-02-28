@@ -1,4 +1,5 @@
 import random
+import copy
 from card import Card
 
 # Abstract base class that describes a player
@@ -7,7 +8,14 @@ from card import Card
 class Player:
 
     def __init__(self):
+        self.opponent = None
         pass
+
+    '''
+    Initializes environment for an iteration of learning
+    '''
+    def initialize(self, kingdom):
+        self.kingdom = kingdom
 
     def reset_game(self):
         self.hand = []
@@ -46,13 +54,14 @@ class Player:
         self.coins = 0
         self.draw(5)
 
-    def num_coins(self):
+    def play_treasures(self):
+        assert self.coins == 0
+
         for card in self.hand:
             if card.f_treasure:
                 self.coins += card.coin_value
                 self.in_play.append(card)
         self.hand = [c for c in self.hand if not c.f_treasure]
-        return self.coins
 
     '''
     Returns num victory points in entire deck
@@ -95,3 +104,27 @@ class Player:
         for card in self.discard:
             pdiscard.append(card.name)
         print("Discard:", pdiscard)
+
+    def get_state(self):
+        # state is of form [hand, deck, discard, opp hand, opp deck, opp discard, kingdom]
+        current_state = []
+        current_state.append(self.hand.copy())
+        current_state.append(self.deck.copy())
+        current_state.append(self.discard.copy())
+        current_state.append(self.opponent.hand.copy())
+        current_state.append(self.opponent.deck.copy())
+        current_state.append(self.opponent.discard.copy())
+        current_state.append(copy.deepcopy(self.kingdom))
+
+        return current_state
+
+    def set_state(self, new_state):
+        # Note: you can't set state and then continue playing an actual game since opponent won't have Kingdom updated (maybe????)
+        # Only used for getting and updating q values
+        self.hand = new_state[0]
+        self.deck = new_state[1]
+        self.discard = new_state[2]
+        self.opponent.hand = new_state[3]
+        self.opponent.deck = new_state[4]
+        self.opponent.discard = new_state[5]
+        self.kingdom = new_state[6]

@@ -184,6 +184,9 @@ class RL_base():
         self.opponent = opponent
         self.kingdom = copy.deepcopy(kingdom)
 
+        self.agent.opponent = self.opponent
+        self.opponent.opponent = self.agent
+
         assert params.num_train_kingdoms * params.num_training_iterations % params.train_from_experiences_every_iterations == 0
         assert (params.num_train_kingdoms * params.num_training_iterations / params.train_from_experiences_every_iterations) % params.update_target_network_every == 0
 
@@ -207,12 +210,12 @@ class RL_base():
             self.buffer.add([self.previous_experience.copy()])
         if self.current_experience is not None:
             # Add next_state to the previous experience before starting new experience
-            self.current_experience.append(self.agent.get_current_state())
+            self.current_experience.append(self.agent.get_state())
             self.current_experience.append(self.at_goal_state() != -1)
             self.previous_experience = self.current_experience.copy()
 
         self.current_experience = []
-        self.current_experience.append(self.agent.get_current_state())
+        self.current_experience.append(self.agent.get_state())
         self.current_experience.append(a)
 
         # Agent buys card a
@@ -283,12 +286,17 @@ class RL_base():
         if self.num_times_trained % params.update_target_network_every == 0:
             self.agent.target_model.load_state_dict(self.agent.model.state_dict())
 
+        # Don't need to reset agent state since training only occurs at end of a game
+
     '''
     Plays one game using current agent against opponent on kingdom, and prints output to test_output_full_file
     '''
     def test_agent(self, opponent, kingdom, test_output_full_file):
         self.opponent = opponent
         self.kingdom = copy.deepcopy(kingdom)
+
+        self.agent.opponent = self.opponent
+        self.opponent.opponent = self.agent
 
         # Reset game
         self.reset_environment()

@@ -35,16 +35,16 @@ class Agent(Player):
         pass
 
     def buy_phase(self):
-        num_coins = self.num_coins()
+        self.play_treasures()
 
-        purchaseable_cards = dominion_utils.get_purchaseable_cards(num_coins, self.kingdom)
+        purchaseable_cards = dominion_utils.get_purchaseable_cards(self.coins, self.kingdom)
         print("Agent purchaseable:", dominion_utils.cards_to_string(purchaseable_cards))
 
         max_action = None
         max_action_val = float("-inf")
 
         for e in purchaseable_cards:
-            state_features = dominion_utils.state_features(num_coins, self.kingdom.turn_num, e)
+            state_features = dominion_utils.state_features(self, self.kingdom, e)
             action_val = self.model(state_features)
 
             print(e.name, action_val.item())
