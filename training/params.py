@@ -1,6 +1,7 @@
 import datetime
 
 debug_mode = 0
+max_card_id = 6
 
 checkpoint_filename = "../training/results/1-15-19/899647092_val_14.pth.tar"
 
@@ -8,15 +9,15 @@ num_train_kingdoms = 80
 num_test_kingdoms = 20
 num_val_kingdoms = 20
 
-num_epochs = 1000
+num_epochs = 10000
 num_training_iterations = 1
 test_on_val_every_epochs = 50
 
 learning_rate = 0.1
 
-f_learning_rate_decay = 0
-learning_rate_start = 0.4
-learning_rate_end = 0.0001
+f_learning_rate_decay = 1
+learning_rate_start = 0.9
+learning_rate_end = 0.01
 learning_rate_decay = 200000
 
 discount_factor = 0.95
@@ -24,7 +25,7 @@ discount_factor = 0.95
 # Boltzmann Exploration Parameters
 tau_start = 1.0
 tau_end = 0.05
-tau_decay = 1000000
+tau_decay = 100000
 
 # Updates every x experience replay trainings
 update_target_network_every = 2
@@ -34,10 +35,10 @@ train_from_experiences_every_iterations = 40
 
 buffer_size = 500
 unusual_sample_factor = 0.9
-batch_size = 50
+batch_size = 100
 
-D_in = 10
-H = 16
+D_in = 10 + (max_card_id + 1)
+H = 32
 D_out = 1
 
 

@@ -99,6 +99,7 @@ def state_features(player, kingdom, a):
     # one-hot vector for a's id
     # special for if a is Nothing?
     # who was starting player
+    # available cards in kingdom
 
     f = []
     f.append(player.coins)
@@ -117,5 +118,10 @@ def state_features(player, kingdom, a):
 
     # opponent - player vp difference
     f.append(player.num_victory_points() - player.opponent.num_victory_points())
+
+    id_vec = [0 for i in range(params.max_card_id + 1)]
+    if a.id != -1:
+        id_vec[a.id] = 1
+    f.extend(id_vec)
 
     return Variable(torch.from_numpy(np.array(f)).float())
