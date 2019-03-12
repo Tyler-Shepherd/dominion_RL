@@ -16,8 +16,9 @@ class Dominion_Agent(Player):
         # Initialize learning model
         self.model = torch.nn.Sequential(
             torch.nn.Linear(params.D_in, params.H),
-            torch.nn.Sigmoid(),
-            torch.nn.Linear(params.H, params.D_out)
+            torch.nn.Tanh(),
+            torch.nn.Linear(params.H, params.D_out),
+            torch.nn.Tanh()
         )
 
         self.target_model = copy.deepcopy(self.model)

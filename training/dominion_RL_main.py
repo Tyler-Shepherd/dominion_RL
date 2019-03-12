@@ -153,7 +153,8 @@ if __name__ == '__main__':
             opp_vp = opponent.num_victory_points()
 
             result_text = "%s\t%f\t%f\t%d\t%d\t%d\t%d\t%f" % (str(kingdom), base.learning_rate, base.tau, kingdom.turn_num, player_vp > opp_vp, opp_vp, player_vp, end - start)
-            print(i, result_text)
+            if params.debug_mode >= 1:
+                print(i, result_text)
             output_file.write(result_text + '\n')
             output_file.flush()
 

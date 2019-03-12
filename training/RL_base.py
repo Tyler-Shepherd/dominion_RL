@@ -97,10 +97,10 @@ class RL_base():
     '''
     def reward(self):
         current_state = self.at_goal_state()
-
         if current_state == -1:
             # Not a goal state
-            reward_val =  0
+            # reward_val =  self.agent.coins / 8
+            reward_val = 0
         else:
             reward_val = self.agent.num_victory_points() - self.opponent.num_victory_points()
 
@@ -125,6 +125,13 @@ class RL_base():
         for v in q_vals:
             probs.append(v / q_sum)
         legal_actions_index = [i for i in range(len(legal_actions))]
+
+        if not np.isclose(sum(probs), [1]):
+            print(sum(probs))
+            print(probs)
+            print(q_vals)
+            print(q_sum)
+
         a = legal_actions[np.random.choice(legal_actions_index, p=probs)]
 
         assert a is not None
@@ -250,7 +257,6 @@ class RL_base():
 
             self.agent.set_state(state)
             old_q_value = self.agent.get_Q_val(action)
-
             self.agent.set_state(next_state)
 
             if done:

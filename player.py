@@ -106,11 +106,12 @@ class Player:
         print("Discard:", pdiscard)
 
     def get_state(self):
-        # state is of form [hand, deck, discard, opp hand, opp deck, opp discard, kingdom]
+        # state is of form [hand, deck, discard, in play, opp hand, opp deck, opp discard, kingdom]
         current_state = []
         current_state.append(self.hand.copy())
         current_state.append(self.deck.copy())
         current_state.append(self.discard.copy())
+        current_state.append(self.in_play.copy())
         current_state.append(self.opponent.hand.copy())
         current_state.append(self.opponent.deck.copy())
         current_state.append(self.opponent.discard.copy())
@@ -124,7 +125,8 @@ class Player:
         self.hand = new_state[0]
         self.deck = new_state[1]
         self.discard = new_state[2]
-        self.opponent.hand = new_state[3]
-        self.opponent.deck = new_state[4]
-        self.opponent.discard = new_state[5]
-        self.kingdom = new_state[6]
+        self.in_play = new_state[3]
+        self.opponent.hand = new_state[4]
+        self.opponent.deck = new_state[5]
+        self.opponent.discard = new_state[6]
+        self.kingdom = new_state[7]

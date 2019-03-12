@@ -11,11 +11,11 @@ num_val_kingdoms = 20
 
 num_epochs = 10000
 num_training_iterations = 1
-test_on_val_every_epochs = 50
+test_on_val_every_epochs = 100
 
-learning_rate = 0.1
+learning_rate = 0.00001
 
-f_learning_rate_decay = 1
+f_learning_rate_decay = 0
 learning_rate_start = 0.9
 learning_rate_end = 0.01
 learning_rate_decay = 200000
@@ -23,21 +23,22 @@ learning_rate_decay = 200000
 discount_factor = 0.95
 
 # Boltzmann Exploration Parameters
-tau_start = 1.0
-tau_end = 0.05
-tau_decay = 100000
+tau_start = 0.9
+tau_end = 0.9
+tau_decay = 1000000
 
 # Updates every x experience replay trainings
 update_target_network_every = 2
 
 # Experience Replay Parameters
-train_from_experiences_every_iterations = 40
+train_from_experiences_every_iterations = 20
 
 buffer_size = 500
-unusual_sample_factor = 0.9
+unusual_sample_factor = 0.4
 batch_size = 100
 
-D_in = 10 + (max_card_id + 1)
+# D_in = 10 + (max_card_id + 2)
+D_in = 2 + (max_card_id + 2)
 H = 32
 D_out = 1
 

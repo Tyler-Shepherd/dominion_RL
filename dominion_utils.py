@@ -55,11 +55,12 @@ def print_feature_weights(model_full):
         print(i[0])
 
 def generate_kingdom():
-    max_card_id = 6
-    new_kingdom = {0: 30, 1: 30, 2: 30, 3: 8, 4: 8, 5: 8}
+    # new_kingdom = {0: 30, 1: 30, 2: 30, 3: 8, 4: 8, 5: 8}
+    # new_kingdom = {0:0, 1:30, 2:30, 3:0, 4:0, 5:8}
+    new_kingdom = {0: 30, 1: 30, 2: 30, 3:0, 4:0, 5:8}
 
     # TODO eventually need to randomly select 10 cards for the kingdom
-    for i in range(6, max_card_id+1):
+    for i in range(6, params.max_card_id+1):
         if random.random() < 0.5:
             new_kingdom[i] = 10
         else:
@@ -94,34 +95,33 @@ def kingdom_to_string(kingdom):
 
 # Returns input layer features at given game state buying Card a
 def state_features(player, kingdom, a):
+    # feature ideas:
     # num remaining of each card in kingdom, num of each card in deck
-    # num of each card opponent has, opponent vp total
-    # one-hot vector for a's id
-    # special for if a is Nothing?
+    # num of each card opponent has
     # who was starting player
-    # available cards in kingdom
+    # which cards are in the kingdom
 
     f = []
-    f.append(player.coins)
-    f.append(a.cost)
-    f.append(player.coins - a.cost)
-    f.append(2 * int(a.f_victory) - 1)
-    f.append(2 * int(a.f_treasure) - 1)
-    f.append(2 * int(a.f_action) - 1)
-    f.append(kingdom.turn_num)
+    # f.append(player.coins)
+    # f.append(a.cost)
+    # f.append(player.coins - a.cost)
+    # f.append(2 * int(a.f_victory) - 1)
+    # f.append(2 * int(a.f_treasure) - 1)
+    # f.append(2 * int(a.f_action) - 1)
+    f.append(kingdom.turn_num / 30)
 
     # player vp total
-    f.append(player.num_victory_points())
+    # f.append(player.num_victory_points())
 
     # opponent vp total
-    f.append(player.opponent.num_victory_points())
+    # f.append(player.opponent.num_victory_points())
 
     # opponent - player vp difference
-    f.append(player.num_victory_points() - player.opponent.num_victory_points())
+    f.append((player.num_victory_points() - player.opponent.num_victory_points()) / 48)
 
-    id_vec = [0 for i in range(params.max_card_id + 1)]
-    if a.id != -1:
-        id_vec[a.id] = 1
+    # one hot vec of card id
+    id_vec = [0 for i in range(params.max_card_id + 2)]
+    id_vec[a.id] = 1 # last entry (-1) is always "nothing"
     f.extend(id_vec)
 
     return Variable(torch.from_numpy(np.array(f)).float())
