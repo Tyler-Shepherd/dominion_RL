@@ -55,9 +55,7 @@ def print_feature_weights(model_full):
         print(i[0])
 
 def generate_kingdom():
-    # new_kingdom = {0: 30, 1: 30, 2: 30, 3: 8, 4: 8, 5: 8}
-    # new_kingdom = {0:0, 1:30, 2:30, 3:0, 4:0, 5:8}
-    new_kingdom = {0: 30, 1: 30, 2: 30, 3:0, 4:0, 5:8}
+    new_kingdom = {0: 30, 1: 30, 2: 30, 3: 8, 4: 8, 5: 8}
 
     # TODO eventually need to randomly select 10 cards for the kingdom
     for i in range(6, params.max_card_id+1):
@@ -96,25 +94,24 @@ def kingdom_to_string(kingdom):
 # Returns input layer features at given game state buying Card a
 def state_features(player, kingdom, a):
     # feature ideas:
-    # num remaining of each card in kingdom, num of each card in deck
+    # num remaining of each card in kingdom
     # num of each card opponent has
     # who was starting player
     # which cards are in the kingdom
 
     f = []
-    # f.append(player.coins)
-    # f.append(a.cost)
-    # f.append(player.coins - a.cost)
-    # f.append(2 * int(a.f_victory) - 1)
-    # f.append(2 * int(a.f_treasure) - 1)
-    # f.append(2 * int(a.f_action) - 1)
+    f.append(player.coins / 8)
+    f.append(a.cost / 8)
+    f.append(2 * int(a.f_victory) - 1)
+    f.append(2 * int(a.f_treasure) - 1)
+    f.append(2 * int(a.f_action) - 1)
     f.append(kingdom.turn_num / 30)
 
     # player vp total
-    # f.append(player.num_victory_points())
+    f.append(player.num_victory_points() / 53)
 
     # opponent vp total
-    # f.append(player.opponent.num_victory_points())
+    f.append(player.opponent.num_victory_points() / 53)
 
     # opponent - player vp difference
     f.append((player.num_victory_points() - player.opponent.num_victory_points()) / 48)
@@ -123,5 +120,22 @@ def state_features(player, kingdom, a):
     id_vec = [0 for i in range(params.max_card_id + 2)]
     id_vec[a.id] = 1 # last entry (-1) is always "nothing"
     f.extend(id_vec)
+
+    # num of each card in deck (in total)
+    num_in_deck = [0 for i in range(params.max_card_id + 1)]
+    for card in player.deck:
+        num_in_deck[card.id] += 1
+    for card in player.discard:
+        num_in_deck[card.id] += 1
+    for card in player.in_play:
+        num_in_deck[card.id] += 1
+    for card in player.hand:
+        num_in_deck[card.id] += 1
+    # normalize based on initial supply
+    for i in range(params.max_card_id + 1):
+        if kingdom.supply_initial[i] == 0:
+            continue
+        num_in_deck[i] = num_in_deck[i] / kingdom.supply_initial[i]
+    f.extend(num_in_deck)
 
     return Variable(torch.from_numpy(np.array(f)).float())

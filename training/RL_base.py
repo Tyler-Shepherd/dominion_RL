@@ -102,7 +102,7 @@ class RL_base():
             # reward_val =  self.agent.coins / 8
             reward_val = 0
         else:
-            reward_val = self.agent.num_victory_points() - self.opponent.num_victory_points()
+            reward_val = (self.agent.num_victory_points() - self.opponent.num_victory_points()) + 48
 
         return torch.tensor(reward_val, dtype = torch.float32)
 
