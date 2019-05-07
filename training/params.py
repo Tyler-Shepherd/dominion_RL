@@ -37,10 +37,9 @@ buffer_size = 500
 unusual_sample_factor = 0.4
 batch_size = 100
 
-D_in = 9 + (max_card_id + 2) + (max_card_id + 1)
-H = 32
+D_in = 9 + (max_card_id + 2) + (max_card_id + 1) + (max_card_id + 1) + (max_card_id + 1) + 1 + (max_card_id + 1)
+H = 64
 D_out = 1
-
 
 # Print parameters
 def print_params(parameters_file):

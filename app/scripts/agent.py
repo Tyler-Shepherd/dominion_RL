@@ -31,10 +31,27 @@ class Agent(Player):
         self.model.load_state_dict(checkpoint)
         print("Loaded model from " + params.checkpoint_filename)
 
+    # Returns played card, or None if agent is ending action phase
     def action_phase(self):
-        pass
+        action_cards = [card for card in self.hand if card.f_action]
+        print("Agent hand at start of action phase: ", dominion_utils.cards_to_string(self.hand))
+
+        if self.num_actions > 0 and len(action_cards) > 0:
+            # just plays cards in random order for now
+            card_to_play = action_cards.pop()
+            self.hand.remove(card_to_play)
+            self.in_play.append(card_to_play)
+            card_to_play.play(self)
+            self.num_actions -= 1
+            return card_to_play
+        else:
+            return None
 
     def buy_phase(self):
+        assert self.num_buys >= 0
+        if self.num_buys == 0:
+            return None
+
         self.play_treasures()
 
         purchaseable_cards = dominion_utils.get_purchaseable_cards(self.coins, self.kingdom)
@@ -55,9 +72,12 @@ class Agent(Player):
 
         assert max_action is not None
 
+        max_action = Card(6)
+
         print("Agent buying", max_action.name)
 
         dominion_utils.buy_card(self, max_action, self.kingdom)
+        self.num_buys -= 1
 
         return max_action
 

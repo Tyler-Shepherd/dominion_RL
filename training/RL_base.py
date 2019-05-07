@@ -147,12 +147,11 @@ class RL_base():
 
         # 1 if agent turn
         # -1 if opponent turn
-        whose_turn = 1 if random.random() < 0.5 else -1
-        starting_player = whose_turn
+        whose_turn = self.kingdom.starting_player
 
         # While not reached goal state
         while self.at_goal_state() == -1:
-            if whose_turn != starting_player:
+            if whose_turn != self.kingdom.starting_player:
                 self.kingdom.next_turn()
 
             if whose_turn == 1:
@@ -311,12 +310,11 @@ class RL_base():
 
         # 1 if agent turn
         # -1 if opponent turn
-        whose_turn = 1 if random.random() < 0.5 else -1
-        starting_player = whose_turn
+        whose_turn = self.kingdom.starting_player
 
         # While not reached goal state
         while self.at_goal_state() == -1:
-            if whose_turn == starting_player:
+            if whose_turn == self.kingdom.starting_player:
                 self.kingdom.next_turn()
 
             if whose_turn == 1:
@@ -344,11 +342,11 @@ class RL_base():
 
         player_won = player_vp > opp_vp
         if player_vp == opp_vp:
-            if whose_turn == starting_player:
+            if whose_turn == self.kingdom.starting_player:
                 # Tie game, both players had equal number of turns
                 player_won = 0
             else:
-                if starting_player == 1:
+                if self.kingdom.starting_player == 1:
                     # Agent had an extra turn, so loses
                     player_won = 0
                 else:

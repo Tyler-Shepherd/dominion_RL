@@ -23,6 +23,8 @@ class Player:
         self.discard = []
         self.in_play = []
         self.coins = 0
+        self.num_actions = 1 # TODO actually use this var then test Village
+        self.num_buys = 1
 
         random.shuffle(self.deck)
 
@@ -46,6 +48,9 @@ class Player:
 
         return cards_drawn
 
+    def plus_actions(self, num_actions):
+        self.num_actions += num_actions
+
     def clean_up(self):
         self.discard += self.hand
         self.discard += self.in_play
@@ -53,6 +58,8 @@ class Player:
         self.in_play = []
         self.coins = 0
         self.draw(5)
+        self.num_actions = 1
+        self.num_buys = 1
 
     def play_treasures(self):
         assert self.coins == 0

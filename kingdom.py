@@ -1,5 +1,6 @@
 from card import Card
 import copy
+import random
 import training.params as params
 
 class Kingdom:
@@ -10,6 +11,7 @@ class Kingdom:
         self.supply = copy.deepcopy(supply)
         self.trash = []
         self.turn_num = 0
+        self.starting_player = 0
 
     def __str__(self):
         pkingdom = {}
@@ -21,6 +23,7 @@ class Kingdom:
         self.supply = copy.deepcopy(self.supply_initial)
         self.trash = []
         self.turn_num = 0
+        self.starting_player = 1 if random.random() < 0.5 else -1
 
     def next_turn(self):
         self.turn_num += 1

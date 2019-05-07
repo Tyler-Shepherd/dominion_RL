@@ -69,6 +69,11 @@ class Card:
             self.f_action = 1
             self.cost = 4
             self.name = "Smithy"
+        elif id == 7:
+            # Village
+            self.f_action = 1
+            self.cost = 3
+            self.name = "Village"
 
     def play(self, player):
         if params.debug_mode >= 2:
@@ -77,3 +82,7 @@ class Card:
         if self.id == 6:
             # Smithy
             player.draw(3)
+        elif self.id == 7:
+            # Village
+            player.plus_actions(2)
+            player.draw(1)

@@ -15,7 +15,9 @@ app.controller('DominionAIController', ['$log', '$http',
   ctrl.person_hand = "";
   ctrl.kingdom = "";
 
+  //num_actions and num_buys are just views of data from server, not actually used in any decisions
   ctrl.action_cards = [];
+  ctrl.num_actions = 1;
 
   ctrl.purchaseable_cards = [];
   ctrl.num_buys = 1;
@@ -36,7 +38,7 @@ app.controller('DominionAIController', ['$log', '$http',
     $http.post('/buy', {"to_buy": card_to_buy})
       .then(function(response) {
         $log.log(response);
-        ctrl.num_buys -= 1;
+        ctrl.num_buys = response.data.num_buys;
         ctrl.kingdom = response.data.kingdom;
       })
       .catch(function(error) {
@@ -50,7 +52,7 @@ app.controller('DominionAIController', ['$log', '$http',
     $http.post('/play_action_card', {"to_play": card_to_play})
       .then(function(response) {
         $log.log(response);
-        ctrl.num_actions -= 1;
+        ctrl.num_actions = response.data.num_actions;
         ctrl.kingdom = response.data.kingdom;
         ctrl.action_cards = response.data.action_cards;
         ctrl.person_hand = response.data.hand;
@@ -116,47 +118,55 @@ app.controller('DominionAIController', ['$log', '$http',
   ctrl.agentNext = function() {
     if(ctrl.play_phase === -1) {
         // agent action phase, play action card or end action phase
-        // TODO: add ability to play action cards
-        ctrl.play_phase = -2;
-        ctrl.play_log = "Opponent ended action phase.";
+        $http.get('/get_agent_action').then(function(response) {
+            $log.log(response);
+
+            ctrl.kingdom = response.data.kingdom;
+
+            if (response.data.end_action_phase) {
+                ctrl.play_phase = -2;
+                ctrl.play_log = "Opponent ended action phase.";
+            }
+            else {
+                ctrl.play_log = "Opponent played " + response.data.played_card;
+            }
+        });
     }
 
     else if (ctrl.play_phase === -2) {
         // agent buy phase, buy card or end turn
-        if(ctrl.num_buys > 0) {
-            $http.get('/get_agent_buy').then(function(response) {
-                $log.log(response);
+        $http.get('/get_agent_buy').then(function(response) {
+            $log.log(response);
 
-                ctrl.kingdom = response.data.kingdom;
-                ctrl.num_buys -= 1;
-                ctrl.play_log = "Opponent bought " + response.data.bought_card;
-            });
-        }
-        else {
-            $http.get('/end_agent_turn').then(function(response) {
-                $log.log(response);
+            ctrl.kingdom = response.data.kingdom;
 
-                if(response.data.game_over) {
-                    ctrl.gameOver = true;
-                    ctrl.play_phase = 0;
-                }
-                else {
+            if (response.data.end_buy_phase) {
+                $http.get('/end_agent_turn').then(function(response) {
+                    $log.log(response);
+
+                    if(response.data.game_over) {
+                        ctrl.gameOver = true;
+                        ctrl.play_phase = 0;
+                    } else {
+                        ctrl.play_phase = 1;
+                        $http.get('/get_action_cards').then(function(response) {
+                            $log.log(response);
+                            ctrl.action_cards = response.data;
+                        });
+                    }
+
+                    ctrl.turn_num = response.data.turn;
+                    ctrl.person_hand = response.data.hand;
+                    ctrl.kingdom = response.data.kingdom;
                     ctrl.play_phase = 1;
-                    $http.get('/get_action_cards').then(function(response) {
-                        $log.log(response);
-                        ctrl.action_cards = response.data;
-                    });
+                    ctrl.num_buys = 1;
+                    ctrl.num_actions = 1;
+
+                    ctrl.play_log = "Opponent ended turn - your turn.";
                 }
-
-                ctrl.turn_num = response.data.turn;
-                ctrl.person_hand = response.data.hand;
-                ctrl.kingdom = response.data.kingdom;
-                ctrl.play_phase = 1;
-                ctrl.num_buys = 1;
-                ctrl.num_actions = 1;
-
-                ctrl.play_log = "Opponent ended turn - your turn.";
-            });
+            } else {
+                ctrl.play_log = "Opponent bought " + response.data.bought_card;
+            }
         }
     }
   };

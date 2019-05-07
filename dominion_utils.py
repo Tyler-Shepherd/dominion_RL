@@ -94,9 +94,6 @@ def kingdom_to_string(kingdom):
 # Returns input layer features at given game state buying Card a
 def state_features(player, kingdom, a):
     # feature ideas:
-    # num remaining of each card in kingdom
-    # num of each card opponent has
-    # who was starting player
     # which cards are in the kingdom
 
     f = []
@@ -137,5 +134,34 @@ def state_features(player, kingdom, a):
             continue
         num_in_deck[i] = num_in_deck[i] / kingdom.supply_initial[i]
     f.extend(num_in_deck)
+
+    # num of each card remaining in kingdom (normalized by initial supply)
+    num_in_kingdom = [j / kingdom.supply_initial[i] if kingdom.supply_initial[i] != 0 else 0 for (i,j) in kingdom.supply.items()]
+    f.extend(num_in_kingdom)
+
+    # TODO: should just be a Player function
+    # num of each card in opponents deck (in total)
+    num_in_opp_deck = [0 for i in range(params.max_card_id + 1)]
+    for card in player.opponent.deck:
+        num_in_opp_deck[card.id] += 1
+    for card in player.opponent.discard:
+        num_in_opp_deck[card.id] += 1
+    for card in player.opponent.in_play:
+        num_in_opp_deck[card.id] += 1
+    for card in player.opponent.hand:
+        num_in_opp_deck[card.id] += 1
+    # normalize based on initial supply
+    for i in range(params.max_card_id + 1):
+        if kingdom.supply_initial[i] == 0:
+            continue
+        num_in_opp_deck[i] = num_in_opp_deck[i] / kingdom.supply_initial[i]
+    f.extend(num_in_opp_deck)
+
+    # who was starting player
+    f.append(kingdom.starting_player)
+
+    # cards in kingdom
+    cards_in_kingdom = [int(kingdom.supply_initial[i] > 0) for i in kingdom.supply.keys()]
+    f.extend(cards_in_kingdom)
 
     return Variable(torch.from_numpy(np.array(f)).float())
