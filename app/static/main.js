@@ -163,11 +163,11 @@ app.controller('DominionAIController', ['$log', '$http',
                     ctrl.num_actions = 1;
 
                     ctrl.play_log = "Opponent ended turn - your turn.";
-                }
+                });
             } else {
                 ctrl.play_log = "Opponent bought " + response.data.bought_card;
             }
-        }
+        });
     }
   };
 }

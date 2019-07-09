@@ -25,6 +25,8 @@ agent = None
 # export FLASK_APP=app.py
 # flask run
 
+# Python Flask middleware
+
 @app.route('/')
 def hello():
     app.logger.info('Index loaded')

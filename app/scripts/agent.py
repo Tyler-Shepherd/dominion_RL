@@ -34,7 +34,7 @@ class Agent(Player):
     # Returns played card, or None if agent is ending action phase
     def action_phase(self):
         action_cards = [card for card in self.hand if card.f_action]
-        print("Agent hand at start of action phase: ", dominion_utils.cards_to_string(self.hand))
+        print("Agent hand action phase: ", dominion_utils.cards_to_string(self.hand))
 
         if self.num_actions > 0 and len(action_cards) > 0:
             # just plays cards in random order for now
@@ -71,8 +71,6 @@ class Agent(Player):
                 max_action_val = action_val
 
         assert max_action is not None
-
-        max_action = Card(6)
 
         print("Agent buying", max_action.name)
 

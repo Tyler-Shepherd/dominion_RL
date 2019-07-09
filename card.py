@@ -84,5 +84,5 @@ class Card:
             player.draw(3)
         elif self.id == 7:
             # Village
-            player.plus_actions(2)
             player.draw(1)
+            player.plus_actions(2)

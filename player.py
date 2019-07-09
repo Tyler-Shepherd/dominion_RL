@@ -1,6 +1,8 @@
 import random
 import copy
 from card import Card
+import training.params as params
+import dominion_utils
 
 # Abstract base class that describes a player
 # Defines current state of deck, hand, and discard
@@ -23,7 +25,7 @@ class Player:
         self.discard = []
         self.in_play = []
         self.coins = 0
-        self.num_actions = 1 # TODO actually use this var then test Village
+        self.num_actions = 1
         self.num_buys = 1
 
         random.shuffle(self.deck)
@@ -45,6 +47,9 @@ class Player:
                 to_draw = self.deck.pop()
                 self.hand.append(to_draw)
                 cards_drawn.append(to_draw)
+
+        if params.debug_mode == 3:
+            print("Drew: ", dominion_utils.cards_to_string(cards_drawn))
 
         return cards_drawn
 
@@ -113,7 +118,7 @@ class Player:
         print("Discard:", pdiscard)
 
     def get_state(self):
-        # state is of form [hand, deck, discard, in play, opp hand, opp deck, opp discard, kingdom]
+        # state is of form [hand, deck, discard, in play, opp hand, opp deck, opp discard, kingdom, num_actions]
         current_state = []
         current_state.append(self.hand.copy())
         current_state.append(self.deck.copy())
@@ -123,12 +128,14 @@ class Player:
         current_state.append(self.opponent.deck.copy())
         current_state.append(self.opponent.discard.copy())
         current_state.append(copy.deepcopy(self.kingdom))
+        current_state.append(self.num_actions)
 
         return current_state
 
     def set_state(self, new_state):
         # Note: you can't set state and then continue playing an actual game since opponent won't have Kingdom updated (maybe????)
         # Only used for getting and updating q values
+        assert len(new_state) == 9
         self.hand = new_state[0]
         self.deck = new_state[1]
         self.discard = new_state[2]
@@ -137,3 +144,4 @@ class Player:
         self.opponent.deck = new_state[5]
         self.opponent.discard = new_state[6]
         self.kingdom = new_state[7]
+        self.num_actions = new_state[8]

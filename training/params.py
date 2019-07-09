@@ -1,17 +1,17 @@
 import datetime
 
 debug_mode = 0
-max_card_id = 6
+max_card_id = 7
 
-checkpoint_filename = "../training/results/3-12-19/58026084_val_59.pth.tar"
+checkpoint_filename = "../training/results/7-7-19/998341071_val_21.pth.tar"
 
 num_train_kingdoms = 80
 num_test_kingdoms = 20
 num_val_kingdoms = 20
 
-num_epochs = 15000
-num_training_iterations = 1
-test_on_val_every_epochs = 100
+num_epochs = 15000              # Num times to iterate over all training kingdoms
+num_training_iterations = 1     # Num times to test each kingdom
+test_on_val_every_epochs = 100  # After how many epochs to test against validation data
 
 learning_rate = 0.0001
 
