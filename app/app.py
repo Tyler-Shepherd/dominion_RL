@@ -44,7 +44,7 @@ def buy():
     dominion_utils.buy_card(person, card_to_buy, kingdom)
 
     data = {"turn": kingdom.turn_num, "hand": dominion_utils.cards_to_string(person.hand),
-            "kingdom": dominion_utils.kingdom_to_string(kingdom)}
+            "kingdom": dominion_utils.kingdom_to_string(kingdom), "num_buys": person.num_buys}
     data = json.dumps(data)
     resp = Response(data, status=200, mimetype='application/json')
     return resp
@@ -64,11 +64,12 @@ def play_card():
     card_to_play.play(person)
     person.num_actions -= 1
 
-    action_cards =  [card for card in person.hand if card.f_action]
+    action_cards = [card for card in person.hand if card.f_action]
     action_cards_data = [{'name': c.name, 'id': c.id} for c in action_cards]
 
     data = {"hand": dominion_utils.cards_to_string(person.hand), "action_cards": action_cards_data,
-            "kingdom": dominion_utils.kingdom_to_string(kingdom), "num_actions": person.num_actions}
+            "kingdom": dominion_utils.kingdom_to_string(kingdom), "num_actions": person.num_actions,
+            "num_buys": person.num_buys}
     data = json.dumps(data)
     resp = Response(data, status=200, mimetype='application/json')
     return resp
@@ -86,7 +87,8 @@ def end_turn():
         kingdom.next_turn()
 
     data = {"turn": kingdom.turn_num, "hand": dominion_utils.cards_to_string(person.hand),
-            "kingdom": dominion_utils.kingdom_to_string(kingdom), "game_over": game_over}
+            "kingdom": dominion_utils.kingdom_to_string(kingdom), "game_over": game_over,
+            "num_buys": agent.num_buys, "num_actions": agent.num_actions}
     data = json.dumps(data)
     resp = Response(data, status=200, mimetype='application/json')
     return resp
@@ -105,7 +107,8 @@ def end_agent_turn():
         kingdom.next_turn()
 
     data = {"turn": kingdom.turn_num, "hand": dominion_utils.cards_to_string(person.hand),
-            "kingdom": dominion_utils.kingdom_to_string(kingdom), "game_over": game_over}
+            "kingdom": dominion_utils.kingdom_to_string(kingdom), "game_over": game_over,
+            "num_buys": person.num_buys, "num_actions": person.num_actions}
     data = json.dumps(data)
     resp = Response(data, status=200, mimetype='application/json')
     return resp
@@ -118,7 +121,8 @@ def get_agent_action():
 
     data = {"kingdom": dominion_utils.kingdom_to_string(kingdom),
             "end_action_phase": played_card is None,
-            "played_card": played_card.name if played_card else ""}
+            "played_card": played_card.name if played_card else "",
+            "num_buys": agent.num_buys, "num_actions": agent.num_actions}
     data = json.dumps(data)
     resp = Response(data, status=200, mimetype='application/json')
     return resp
@@ -131,7 +135,8 @@ def get_agent_buy():
 
     data = {"kingdom": dominion_utils.kingdom_to_string(kingdom),
             "end_buy_phase": bought_card is None,
-            "bought_card": bought_card.name if bought_card else ""}
+            "bought_card": bought_card.name if bought_card else "",
+            "num_buys": agent.num_buys}
     data = json.dumps(data)
     resp = Response(data, status=200, mimetype='application/json')
     return resp

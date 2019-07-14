@@ -162,11 +162,11 @@ class RL_base():
                 # Agent's turn
                 self.agent.action_phase()
 
-                # should extend over multiple buys
-                card_to_purchase, purchasable_cards = self.get_agent_buy_policy()
+                while self.agent.num_buys > 0:
+                    card_to_purchase, purchasable_cards = self.get_agent_buy_policy()
 
-                # Take the action and update q vals
-                self.agent_purchase(card_to_purchase, purchasable_cards)
+                    # Take the action and update q vals
+                    self.agent_purchase(card_to_purchase, purchasable_cards)
 
                 self.agent.clean_up()
 
@@ -213,6 +213,7 @@ class RL_base():
         if self.previous_experience is not None:
             # Add legal actions to the experience from two steps ago
             self.previous_experience.append(legal_actions)
+            # Experience completed - add to buffer
             self.buffer.add([self.previous_experience.copy()])
         if self.current_experience is not None:
             # Add next_state to the previous experience before starting new experience

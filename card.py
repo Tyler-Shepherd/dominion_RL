@@ -74,8 +74,15 @@ class Card:
             self.f_action = 1
             self.cost = 3
             self.name = "Village"
+        elif id == 8:
+            # Woodcutter
+            self.f_action = 1
+            self.cost = 3
+            self.name = "Woodcutter"
 
     def play(self, player):
+        assert self.f_action
+
         if params.debug_mode >= 2:
             print("Playing", self.name)
 
@@ -86,3 +93,9 @@ class Card:
             # Village
             player.draw(1)
             player.plus_actions(2)
+        elif self.id == 8:
+            # Woodcutter
+            player.plus_buys(1)
+            player.plus_coins(2)
+        else:
+            raise Exception('Unknown card id to be played')

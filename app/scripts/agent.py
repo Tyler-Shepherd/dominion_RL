@@ -50,6 +50,7 @@ class Agent(Player):
     def buy_phase(self):
         assert self.num_buys >= 0
         if self.num_buys == 0:
+            # "None" is not pass - to skip a buy would be Card(-1)
             return None
 
         self.play_treasures()
@@ -75,7 +76,6 @@ class Agent(Player):
         print("Agent buying", max_action.name)
 
         dominion_utils.buy_card(self, max_action, self.kingdom)
-        self.num_buys -= 1
 
         return max_action
 

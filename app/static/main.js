@@ -15,7 +15,7 @@ app.controller('DominionAIController', ['$log', '$http',
   ctrl.person_hand = "";
   ctrl.kingdom = "";
 
-  //num_actions and num_buys are just views of data from server, not actually used in any decisions
+  //num_actions and num_buys are just views of data from server, not set by client
   ctrl.action_cards = [];
   ctrl.num_actions = 1;
 
@@ -40,7 +40,15 @@ app.controller('DominionAIController', ['$log', '$http',
         $log.log(response);
         ctrl.num_buys = response.data.num_buys;
         ctrl.kingdom = response.data.kingdom;
-      })
+        $http.get('/get_purchaseable_cards')
+            .then(function(response) {
+                $log.log(response);
+                ctrl.purchaseable_cards = response.data;
+
+                $log.log('purchaseable:');
+                $log.log(ctrl.purchaseable_cards);
+            });
+       })
       .catch(function(error) {
         $log.log(error);
       });
@@ -56,6 +64,7 @@ app.controller('DominionAIController', ['$log', '$http',
         ctrl.kingdom = response.data.kingdom;
         ctrl.action_cards = response.data.action_cards;
         ctrl.person_hand = response.data.hand;
+        ctrl.num_buys = response.data.num_buys;
       })
       .catch(function(error) {
         $log.log(error);
@@ -77,8 +86,10 @@ app.controller('DominionAIController', ['$log', '$http',
         ctrl.turn_num = response.data.turn;
         ctrl.person_hand = response.data.hand;
         ctrl.kingdom = response.data.kingdom;
-        ctrl.num_actions = 1;
-        ctrl.num_buys = 1;
+
+        // Agent num_buys and num_actions
+        ctrl.num_actions = response.data.num_actions;
+        ctrl.num_buys = response.data.num_buys;
     });
   };
 
@@ -130,6 +141,9 @@ app.controller('DominionAIController', ['$log', '$http',
             else {
                 ctrl.play_log = "Opponent played " + response.data.played_card;
             }
+
+            ctrl.num_buys = response.data.num_buys;
+            ctrl.num_actions = response.data.num_actions;
         });
     }
 
@@ -158,14 +172,14 @@ app.controller('DominionAIController', ['$log', '$http',
                     ctrl.turn_num = response.data.turn;
                     ctrl.person_hand = response.data.hand;
                     ctrl.kingdom = response.data.kingdom;
-                    ctrl.play_phase = 1;
-                    ctrl.num_buys = 1;
-                    ctrl.num_actions = 1;
+                    ctrl.num_buys = response.data.num_buys;
+                    ctrl.num_actions = response.data.num_actions;
 
                     ctrl.play_log = "Opponent ended turn - your turn.";
                 });
             } else {
                 ctrl.play_log = "Opponent bought " + response.data.bought_card;
+                ctrl.num_buys = response.data.num_buys;
             }
         });
     }

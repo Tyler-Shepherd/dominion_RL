@@ -56,6 +56,12 @@ class Player:
     def plus_actions(self, num_actions):
         self.num_actions += num_actions
 
+    def plus_coins(self, num_coins):
+        self.coins += num_coins
+
+    def plus_buys(self, num_buys):
+        self.num_buys += num_buys
+
     def clean_up(self):
         self.discard += self.hand
         self.discard += self.in_play
@@ -67,8 +73,6 @@ class Player:
         self.num_buys = 1
 
     def play_treasures(self):
-        assert self.coins == 0
-
         for card in self.hand:
             if card.f_treasure:
                 self.coins += card.coin_value
@@ -129,13 +133,15 @@ class Player:
         current_state.append(self.opponent.discard.copy())
         current_state.append(copy.deepcopy(self.kingdom))
         current_state.append(self.num_actions)
+        current_state.append(self.num_buys)
+        current_state.append(self.coins)
 
         return current_state
 
     def set_state(self, new_state):
         # Note: you can't set state and then continue playing an actual game since opponent won't have Kingdom updated (maybe????)
         # Only used for getting and updating q values
-        assert len(new_state) == 9
+        assert len(new_state) == 11
         self.hand = new_state[0]
         self.deck = new_state[1]
         self.discard = new_state[2]
@@ -145,3 +151,5 @@ class Player:
         self.opponent.discard = new_state[6]
         self.kingdom = new_state[7]
         self.num_actions = new_state[8]
+        self.num_buys = new_state[9]
+        self.coins = new_state[10]

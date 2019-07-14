@@ -8,9 +8,13 @@ from card import Card
 from kingdom import Kingdom
 
 def buy_card(player, card, kingdom):
+    assert player.num_buys > 0
     if card.id != -1:
+        assert player.coins >= card.cost
         kingdom.buy_card(card)
         player.discard.append(card)
+        player.num_buys -= 1
+        player.coins -= card.cost
 
 # Prints the total sum of weights off each input feature
 def print_feature_weights(model_full):
