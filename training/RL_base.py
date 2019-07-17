@@ -99,8 +99,8 @@ class RL_base():
         current_state = self.at_goal_state()
         if current_state == -1:
             # Not a goal state
-            # reward_val =  self.agent.coins / 8
-            reward_val = 0
+            reward_val =  self.agent.coins / 8
+            # reward_val = 0
         else:
             reward_val = (self.agent.num_victory_points() - self.opponent.num_victory_points()) + 48
 
@@ -321,9 +321,10 @@ class RL_base():
             if whose_turn == 1:
                 # Agent's turn
                 self.agent.action_phase()
-                bought_card = self.agent.buy_phase()
+                purchases = self.agent.buy_phase()
 
-                test_output_full_file.write(str(self.kingdom.turn_num) + '\t' + str(self.agent.coins) + '\t' + str(bought_card.name) + '\n')
+                for coins, bought_card in purchases:
+                    test_output_full_file.write(str(self.kingdom.turn_num) + '\t' + str(coins) + '\t' + str(bought_card.name) + '\n')
 
                 self.agent.clean_up()
             else:

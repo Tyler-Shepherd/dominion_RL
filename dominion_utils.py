@@ -59,14 +59,16 @@ def print_feature_weights(model_full):
         print(i[0])
 
 def generate_kingdom():
-    new_kingdom = {0: 30, 1: 30, 2: 30, 3: 8, 4: 8, 5: 8}
+    new_kingdom = {0: 30, 1: 30, 2: 30, 3: 8, 4: 8, 5: 8, 6: 10}
 
     # TODO eventually need to randomly select 10 cards for the kingdom
-    for i in range(6, params.max_card_id+1):
+    for i in range(7, params.max_card_id+1):
         if random.random() < 0.5:
             new_kingdom[i] = 10
         else:
             new_kingdom[i] = 0
+
+    new_kingdom[10] = 10
 
     return Kingdom(new_kingdom)
 
@@ -106,6 +108,8 @@ def state_features(player, kingdom, a):
     f.append(2 * int(a.f_victory) - 1)
     f.append(2 * int(a.f_treasure) - 1)
     f.append(2 * int(a.f_action) - 1)
+    f.append(2 * int(a.f_attack) - 1)
+    f.append(2 * int(a.f_curse) - 1)
     f.append(kingdom.turn_num / 30)
 
     # player vp total

@@ -86,28 +86,36 @@ class Dominion_Agent(Player):
     Does buy phase using learned model greedily
     '''
     def buy_phase(self):
-        legal_actions = self.get_legal_actions()
+        # list of (cost, bought card)
+        purchases = []
 
-        max_action = None
-        max_action_val = float("-inf")
-        for e in legal_actions:
-            action_val = self.get_Q_val(e)
+        while self.num_buys > 0:
+            legal_actions = self.get_legal_actions()
 
-            if params.debug_mode >= 3:
-                print(e.name, action_val.item())
+            max_action = None
+            max_action_val = float("-inf")
+            for e in legal_actions:
+                action_val = self.get_Q_val(e)
 
-            if action_val > max_action_val:
-                max_action = e
-                max_action_val = action_val
+                if params.debug_mode >= 3:
+                    print(e.name, action_val.item())
 
-        assert max_action is not None
-        dominion_utils.buy_card(self, max_action, self.kingdom)
+                if action_val > max_action_val:
+                    max_action = e
+                    max_action_val = action_val
 
-        if params.debug_mode >= 2:
-            print("Agent buying", max_action.name)
+            assert max_action is not None
 
-        # should return list of cards when multiple buys
-        return max_action
+            if self.coins >= 3 and self.kingdom.supply[9] > 0:
+                max_action = Card(9)
+
+            purchases.append((self.coins, max_action))
+            dominion_utils.buy_card(self, max_action, self.kingdom)
+
+            if params.debug_mode >= 2:
+                print("Agent buying", max_action.name)
+
+        return purchases
 
     def action_phase(self):
         action_cards = [card for card in self.hand if card.f_action]

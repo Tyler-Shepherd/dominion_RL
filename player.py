@@ -83,9 +83,9 @@ class Player:
     Returns num victory points in entire deck
     '''
     def num_victory_points(self):
-        vp_deck = sum(card.victory_value for card in self.deck if card.f_victory)
-        vp_discard = sum(card.victory_value for card in self.discard if card.f_victory)
-        vp_hand = sum(card.victory_value for card in self.hand if card.f_victory)
+        vp_deck = sum(card.victory_value for card in self.deck if (card.f_victory or card.f_curse))
+        vp_discard = sum(card.victory_value for card in self.discard if (card.f_victory or card.f_curse))
+        vp_hand = sum(card.victory_value for card in self.hand if (card.f_victory or card.f_curse))
 
         return vp_deck + vp_discard + vp_hand
 

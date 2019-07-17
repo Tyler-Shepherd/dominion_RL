@@ -99,7 +99,7 @@ if __name__ == '__main__':
     total_num_turns = 0
 
     # Print header
-    header = "Kingdom\tLearning Rate\tTau\tTurns\tPlayer Won\tOpponent VP\tPlayer VP\tRuntime"
+    header = "Kingdom\tLearning Rate\tTau\tPlayer Won\tOpponent VP\tPlayer VP\tRuntime"
     print(header)
     output_file.write(header+'\n')
 
@@ -155,7 +155,7 @@ if __name__ == '__main__':
             player_vp = agent.num_victory_points()
             opp_vp = opponent.num_victory_points()
 
-            result_text = "%s\t%f\t%f\t%d\t%d\t%d\t%d\t%f" % (str(kingdom), base.learning_rate, base.tau, kingdom.turn_num, player_vp > opp_vp, opp_vp, player_vp, end - start)
+            result_text = "%s\t%f\t%f\t%d\t%d\t%d\t%f" % (str(kingdom), base.learning_rate, base.tau, player_vp > opp_vp, opp_vp, player_vp, end - start)
             if params.debug_mode >= 1:
                 print(i, result_text)
             output_file.write(result_text + '\n')

@@ -18,6 +18,8 @@ class Card:
         self.f_treasure = 0
         self.f_victory = 0
         self.f_action = 0
+        self.f_attack = 0
+        self.f_curse = 0
 
         self.coin_value = 0
         self.victory_value = 0
@@ -65,20 +67,32 @@ class Card:
             self.cost = 8
             self.name = "Province"
         elif id == 6:
+            # Curse
+            self.f_curse = 1
+            self.cost = 0
+            self.victory_value = -1
+            self.name = "Curse"
+        elif id == 7:
             # Smithy
             self.f_action = 1
             self.cost = 4
             self.name = "Smithy"
-        elif id == 7:
+        elif id == 8:
             # Village
             self.f_action = 1
             self.cost = 3
             self.name = "Village"
-        elif id == 8:
+        elif id == 9:
             # Woodcutter
             self.f_action = 1
             self.cost = 3
             self.name = "Woodcutter"
+        elif id == 10:
+            # Witch
+            self.f_action = 1
+            self.f_attack = 1
+            self.cost = 5
+            self.name = "Witch"
 
     def play(self, player):
         assert self.f_action
@@ -86,16 +100,20 @@ class Card:
         if params.debug_mode >= 2:
             print("Playing", self.name)
 
-        if self.id == 6:
+        if self.id == 7:
             # Smithy
             player.draw(3)
-        elif self.id == 7:
+        elif self.id == 8:
             # Village
             player.draw(1)
             player.plus_actions(2)
-        elif self.id == 8:
+        elif self.id == 9:
             # Woodcutter
             player.plus_buys(1)
             player.plus_coins(2)
+        elif self.id == 10:
+            # Witch
+            player.draw(2)
+            player.opponent.discard.append(Card(6))
         else:
             raise Exception('Unknown card id to be played')
