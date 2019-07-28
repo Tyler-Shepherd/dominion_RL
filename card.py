@@ -99,6 +99,11 @@ class Card:
             self.f_reaction = 1
             self.cost = 2
             self.name = "Moat"
+        elif id == 12:
+            # Workshop
+            self.f_action = 1
+            self.cost = 3
+            self.name = "Workshop"
 
     def play(self, player):
         assert self.f_action
@@ -128,5 +133,8 @@ class Card:
         elif self.id == 11:
             # Moat
             player.draw(2)
+        elif self.id == 12:
+            # Workshop
+            return player.gain_card_up_to(4)
         else:
             raise Exception('Unknown card id to be played')

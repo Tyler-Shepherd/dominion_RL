@@ -61,7 +61,8 @@ def play_card():
 
     person.hand.remove(card_to_play)
     person.in_play.append(card_to_play)
-    card_to_play.play(person)
+    follow_up_action = card_to_play.play(person)
+    print("FOLLOW UP ACTION", follow_up_action)
     person.num_actions -= 1
 
     action_cards = [card for card in person.hand if card.f_action]

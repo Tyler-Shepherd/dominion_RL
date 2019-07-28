@@ -12,9 +12,15 @@ def buy_card(player, card, kingdom):
     player.num_buys -= 1
     if card.id != -1:
         assert player.coins >= card.cost
-        kingdom.buy_card(card)
-        player.discard.append(card)
         player.coins -= card.cost
+        gain_card(player, card, kingdom)
+
+def gain_card(player, card, kingdom):
+    assert card.id > -1
+    if params.debug_mode >= 3:
+        print(player.name, "gaining", card.name)
+    kingdom.gain_card(card)
+    player.discard.append(card)
 
 # Prints the total sum of weights off each input feature
 def print_feature_weights(model_full):
@@ -67,6 +73,8 @@ def generate_kingdom():
             new_kingdom[i] = 10
         else:
             new_kingdom[i] = 0
+
+    new_kingdom[12] = 10
 
     return Kingdom(new_kingdom)
 

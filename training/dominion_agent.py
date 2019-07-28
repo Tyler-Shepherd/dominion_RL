@@ -2,6 +2,7 @@ import copy
 
 import torch
 import numpy as np
+import random
 from torch.autograd import Variable
 
 from card import Card
@@ -106,6 +107,8 @@ class Dominion_Agent(Player):
 
             assert max_action is not None
 
+            # max_action = dominion_utils.force_buy(12, self, max_action)
+
             purchases.append((self.coins, max_action))
             dominion_utils.buy_card(self, max_action, self.kingdom)
 
@@ -135,3 +138,9 @@ class Dominion_Agent(Player):
         self.model.load_state_dict(checkpoint)
         print("Loaded model from " + checkpoint_filename)
 
+    def gain_card_up_to_helper(self, limit):
+        gainable = dominion_utils.get_purchaseable_cards(limit, self.kingdom)
+        return random.choice(gainable)
+
+        # todo use buy policy to choose which to gain
+        # todo eventually make this its own policy? or at least update q values based on this choice

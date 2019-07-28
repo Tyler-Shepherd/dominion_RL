@@ -65,6 +65,9 @@ app.controller('DominionAIController', ['$log', '$http',
         ctrl.action_cards = response.data.action_cards;
         ctrl.person_hand = response.data.hand;
         ctrl.num_buys = response.data.num_buys;
+
+        // if returns follow up action
+        // do the follow up action
       })
       .catch(function(error) {
         $log.log(error);
