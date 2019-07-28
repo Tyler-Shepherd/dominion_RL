@@ -93,9 +93,18 @@ class Card:
             self.f_attack = 1
             self.cost = 5
             self.name = "Witch"
+        elif id == 11:
+            # Moat
+            self.f_action = 1
+            self.f_reaction = 1
+            self.cost = 2
+            self.name = "Moat"
 
     def play(self, player):
         assert self.f_action
+
+        # Trigger reactions if this is an Attack card
+        opponent_unnaffected = player.opponent.attack_played() if self.f_attack else None
 
         if params.debug_mode >= 2:
             print("Playing", self.name)
@@ -114,6 +123,10 @@ class Card:
         elif self.id == 10:
             # Witch
             player.draw(2)
-            player.opponent.discard.append(Card(6))
+            if not opponent_unnaffected:
+                player.opponent.discard.append(Card(6))
+        elif self.id == 11:
+            # Moat
+            player.draw(2)
         else:
             raise Exception('Unknown card id to be played')

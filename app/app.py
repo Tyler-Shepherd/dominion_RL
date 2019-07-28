@@ -97,7 +97,6 @@ def end_turn():
 def end_agent_turn():
     global kingdom, person, agent
     agent.clean_up()
-    print("Agent state:")
     agent.print_state()
 
     game_over = False
@@ -175,7 +174,7 @@ def get_purchaseable_cards():
     purchaseable_cards = dominion_utils.get_purchaseable_cards(person.coins, kingdom)
     purchaseable_cards_data = [{'name': c.name, 'id': c.id} for c in purchaseable_cards]
 
-    app.logger.info("purchaseable: %s", str(purchaseable_cards_data))
+    app.logger.info("Purchaseable: %s", str(purchaseable_cards_data))
 
     resp = Response(json.dumps(purchaseable_cards_data), status=200, mimetype='application/json')
     return resp
@@ -186,7 +185,7 @@ def get_action_cards():
     action_cards =  [card for card in person.hand if card.f_action]
     action_cards_data = [{'name': c.name, 'id': c.id} for c in action_cards]
 
-    app.logger.info("action cards: %s", str(action_cards_data))
+    app.logger.info("Action cards: %s", str(action_cards_data))
 
     resp = Response(json.dumps(action_cards_data), status=200, mimetype='application/json')
     return resp

@@ -99,8 +99,9 @@ class RL_base():
         current_state = self.at_goal_state()
         if current_state == -1:
             # Not a goal state
-            reward_val =  self.agent.coins / 8
-            # reward_val = 0
+            # reward_val =  self.agent.coins / 8
+            reward_val = 0
+            # reward_val = (self.agent.num_victory_points() - self.opponent.num_victory_points()) + 48
         else:
             reward_val = (self.agent.num_victory_points() - self.opponent.num_victory_points()) + 48
 

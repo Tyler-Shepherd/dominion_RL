@@ -15,7 +15,7 @@ from torch.autograd import Variable
 class Agent(Player):
 
     def __init__(self):
-        super(Agent, self).__init__()
+        super(Agent, self).__init__("Opponent Agent")
 
     def initialize(self, kingdom):
         self.kingdom = kingdom
@@ -72,6 +72,8 @@ class Agent(Player):
                 max_action_val = action_val
 
         assert max_action is not None
+
+        # max_action = dominion_utils.force_buy(11, self, max_action)
 
         print("Agent buying", max_action.name)
 

@@ -10,7 +10,7 @@ from player import Player
 class Person(Player):
 
     def __init__(self):
-        super(Person, self).__init__()
+        super(Person, self).__init__("Person")
 
     def initialize(self, kingdom):
         self.kingdom = kingdom

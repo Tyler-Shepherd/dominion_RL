@@ -1,9 +1,9 @@
 import datetime
 
 debug_mode = 0
-max_card_id = 10
+max_card_id = 11
 
-checkpoint_filename = "../training/results/570614028_val_init.pth.tar"
+checkpoint_filename = "../training/results/397717603_val_0.pth.tar"
 
 num_train_kingdoms = 80
 num_test_kingdoms = 20
@@ -24,7 +24,7 @@ discount_factor = 0.95
 
 # Boltzmann Exploration Parameters
 tau_start = 1.0
-tau_end = 0.8
+tau_end = 0.2
 tau_decay = 10000000
 
 # Updates every x experience replay trainings

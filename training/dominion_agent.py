@@ -11,7 +11,7 @@ import dominion_utils
 
 class Dominion_Agent(Player):
     def __init__(self, loss_output_file):
-        super(Dominion_Agent, self).__init__()
+        super(Dominion_Agent, self).__init__("Training Agent")
 
         # Initialize learning model
         self.model = torch.nn.Sequential(
@@ -105,9 +105,6 @@ class Dominion_Agent(Player):
                     max_action_val = action_val
 
             assert max_action is not None
-
-            if self.coins >= 3 and self.kingdom.supply[9] > 0:
-                max_action = Card(9)
 
             purchases.append((self.coins, max_action))
             dominion_utils.buy_card(self, max_action, self.kingdom)

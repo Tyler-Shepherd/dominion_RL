@@ -9,11 +9,11 @@ from kingdom import Kingdom
 
 def buy_card(player, card, kingdom):
     assert player.num_buys > 0
+    player.num_buys -= 1
     if card.id != -1:
         assert player.coins >= card.cost
         kingdom.buy_card(card)
         player.discard.append(card)
-        player.num_buys -= 1
         player.coins -= card.cost
 
 # Prints the total sum of weights off each input feature
@@ -67,8 +67,6 @@ def generate_kingdom():
             new_kingdom[i] = 10
         else:
             new_kingdom[i] = 0
-
-    new_kingdom[10] = 10
 
     return Kingdom(new_kingdom)
 
@@ -173,3 +171,8 @@ def state_features(player, kingdom, a):
     f.extend(cards_in_kingdom)
 
     return Variable(torch.from_numpy(np.array(f)).float())
+
+def force_buy(card_id, player, old_choice):
+    if player.coins >= Card(card_id).cost and player.kingdom.supply[card_id] > 0:
+        return Card(card_id)
+    return old_choice

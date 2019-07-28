@@ -9,8 +9,9 @@ import dominion_utils
 
 class Player:
 
-    def __init__(self):
+    def __init__(self, name):
         self.opponent = None
+        self.name = name
         pass
 
     '''
@@ -101,6 +102,8 @@ class Player:
     Prints deck and hand
     '''
     def print_state(self):
+        print("State for ", self.name)
+
         pinplay = []
         for card in self.in_play:
             pinplay.append(card.name)
@@ -153,3 +156,12 @@ class Player:
         self.num_actions = new_state[8]
         self.num_buys = new_state[9]
         self.coins = new_state[10]
+
+    def attack_played(self):
+        # TODO give choice of playing reactions (especially in app)
+        if any(card.id == 11 for card in self.hand):
+            if params.debug_mode >= 2:
+                print("Moat revealed - Attack blocked")
+            return True
+
+        return False

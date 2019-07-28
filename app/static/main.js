@@ -45,7 +45,7 @@ app.controller('DominionAIController', ['$log', '$http',
                 $log.log(response);
                 ctrl.purchaseable_cards = response.data;
 
-                $log.log('purchaseable:');
+                $log.log('Purchaseable:');
                 $log.log(ctrl.purchaseable_cards);
             });
        })
