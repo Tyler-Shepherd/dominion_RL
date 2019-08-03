@@ -138,9 +138,11 @@ class Dominion_Agent(Player):
         self.model.load_state_dict(checkpoint)
         print("Loaded model from " + checkpoint_filename)
 
-    def gain_card_up_to_helper(self, limit):
-        gainable = dominion_utils.get_purchaseable_cards(limit, self.kingdom)
-        return random.choice(gainable)
-
+    def gain_card_up_to(self, limit):
         # todo use buy policy to choose which to gain
         # todo eventually make this its own policy? or at least update q values based on this choice
+        # todo make this a dominion_util function we can call in both dominion_agent.py and agent.py
+
+        gainable = dominion_utils.get_purchaseable_cards(limit, self.kingdom)
+        card_to_gain = random.choice(gainable)
+        dominion_utils.gain_card(self, card_to_gain, self.kingdom)

@@ -49,6 +49,22 @@ def buy():
     resp = Response(data, status=200, mimetype='application/json')
     return resp
 
+@app.route('/gain', methods=['POST'])
+def gain():
+    global kingdom, person, agent
+    data = json.loads(request.data.decode())
+    card_to_gain = Card(data['to_gain'])
+
+    app.logger.info("Gaining " + card_to_gain.name)
+
+    dominion_utils.gain_card(person, card_to_gain, kingdom)
+
+    data = {"turn": kingdom.turn_num, "hand": dominion_utils.cards_to_string(person.hand),
+            "kingdom": dominion_utils.kingdom_to_string(kingdom)}
+    data = json.dumps(data)
+    resp = Response(data, status=200, mimetype='application/json')
+    return resp
+
 @app.route('/play_action_card', methods=['POST'])
 def play_card():
     global kingdom, person, agent
@@ -62,15 +78,14 @@ def play_card():
     person.hand.remove(card_to_play)
     person.in_play.append(card_to_play)
     follow_up_action = card_to_play.play(person)
-    print("FOLLOW UP ACTION", follow_up_action)
     person.num_actions -= 1
 
     action_cards = [card for card in person.hand if card.f_action]
-    action_cards_data = [{'name': c.name, 'id': c.id} for c in action_cards]
+    action_cards_data = dominion_utils.serialize_cards(action_cards)
 
     data = {"hand": dominion_utils.cards_to_string(person.hand), "action_cards": action_cards_data,
             "kingdom": dominion_utils.kingdom_to_string(kingdom), "num_actions": person.num_actions,
-            "num_buys": person.num_buys}
+            "num_buys": person.num_buys, "follow_up": follow_up_action.serialize()}
     data = json.dumps(data)
     resp = Response(data, status=200, mimetype='application/json')
     return resp
@@ -173,7 +188,7 @@ def get_purchaseable_cards():
     global kingdom, person, agent
     person.play_treasures()
     purchaseable_cards = dominion_utils.get_purchaseable_cards(person.coins, kingdom)
-    purchaseable_cards_data = [{'name': c.name, 'id': c.id} for c in purchaseable_cards]
+    purchaseable_cards_data = dominion_utils.serialize_cards(purchaseable_cards)
 
     app.logger.info("Purchaseable: %s", str(purchaseable_cards_data))
 
@@ -184,7 +199,7 @@ def get_purchaseable_cards():
 def get_action_cards():
     global kingdom, person, agent
     action_cards =  [card for card in person.hand if card.f_action]
-    action_cards_data = [{'name': c.name, 'id': c.id} for c in action_cards]
+    action_cards_data = dominion_utils.serialize_cards(action_cards)
 
     app.logger.info("Action cards: %s", str(action_cards_data))
 

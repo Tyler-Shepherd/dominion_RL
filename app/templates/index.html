@@ -58,7 +58,16 @@
     <div ng-if="ctrl.play_phase === 1">
         <h3>Num Actions: <span ng-bind="ctrl.num_actions"></span></h3>
 
-        <div ng-if="ctrl.num_actions > 0">
+        <div ng-if="ctrl.follow_up_active">
+            <span ng-if="ctrl.follow_up.type == 1">
+                Gain card costing up to {[ctrl.follow_up.gain_card_limit]}:
+                <span ng-repeat="card in ctrl.follow_up.gainable_cards">
+                    <button ng-click="ctrl.followUpGainCard(card.id)">{[card.name]}</button>
+                </span>
+            </span>
+        </div>
+
+        <div ng-if="ctrl.num_actions > 0 && !ctrl.follow_up_active">
             Action Cards:
             <span ng-repeat="card in ctrl.action_cards" >
                 <button ng-click="ctrl.playCard(card.id)">{[card.name]}</button>
@@ -67,7 +76,7 @@
 
         <br>
 
-        <button ng-click="ctrl.endActionPhase()">End Action Phase</button>
+        <button ng-if="!ctrl.follow_up_active" ng-click="ctrl.endActionPhase()">End Action Phase</button>
     </div>
 
     <div ng-if="ctrl.play_phase === 2">

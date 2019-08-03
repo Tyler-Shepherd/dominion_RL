@@ -73,7 +73,7 @@ class Agent(Player):
 
         assert max_action is not None
 
-        # max_action = dominion_utils.force_buy(11, self, max_action)
+        # max_action = dominion_utils.force_buy(12, self, max_action)
 
         print("Agent buying", max_action.name)
 
@@ -81,3 +81,11 @@ class Agent(Player):
 
         return max_action
 
+    def gain_card_up_to(self, limit):
+        # todo use buy policy to choose which to gain
+        # todo eventually make this its own policy? or at least update q values based on this choice
+        # todo make this a dominion_util function we can call in both dominion_agent.py and agent.py
+
+        gainable = dominion_utils.get_purchaseable_cards(limit, self.kingdom)
+        card_to_gain = random.choice(gainable)
+        dominion_utils.gain_card(self, card_to_gain, self.kingdom)

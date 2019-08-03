@@ -74,7 +74,7 @@ def generate_kingdom():
         else:
             new_kingdom[i] = 0
 
-    new_kingdom[12] = 10
+    # new_kingdom[12] = 10
 
     return Kingdom(new_kingdom)
 
@@ -83,6 +83,9 @@ def cards_to_string(cards):
     for card in cards:
         c_str.append(card.name)
     return c_str
+
+def serialize_cards(cards):
+    return [{'name': c.name, 'id': c.id} for c in cards]
 
 def get_purchaseable_cards(num_coins, kingdom):
     cards_purchasable = []

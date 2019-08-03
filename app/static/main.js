@@ -32,6 +32,9 @@ app.controller('DominionAIController', ['$log', '$http',
   // play_phase = 2: player buy phase
   ctrl.play_phase = 0;
 
+  ctrl.follow_up = {};
+  ctrl.follow_up_active = false;
+
   ctrl.buyCard = function(card_to_buy) {
     $log.log("Buying " + card_to_buy);
 
@@ -66,8 +69,12 @@ app.controller('DominionAIController', ['$log', '$http',
         ctrl.person_hand = response.data.hand;
         ctrl.num_buys = response.data.num_buys;
 
-        // if returns follow up action
-        // do the follow up action
+        if (response.data.follow_up) {
+            ctrl.follow_up = response.data.follow_up;
+            ctrl.follow_up_active = true;
+            $log.log("Follow up action");
+            $log.log(ctrl.follow_up);
+        }
       })
       .catch(function(error) {
         $log.log(error);
@@ -186,6 +193,21 @@ app.controller('DominionAIController', ['$log', '$http',
             }
         });
     }
+  };
+
+  ctrl.followUpGainCard = function(card_to_gain) {
+    $log.log("Follow up gain " + card_to_gain);
+
+    $http.post('/gain', {"to_gain": card_to_gain})
+      .then(function(response) {
+        $log.log(response);
+        ctrl.kingdom = response.data.kingdom;
+        // todo eventually actions will have multiple follow ups and wont just be able to set active to false here
+        ctrl.follow_up_active = false;
+       })
+      .catch(function(error) {
+        $log.log(error);
+      });
   };
 }
 ]);

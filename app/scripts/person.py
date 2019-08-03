@@ -22,5 +22,5 @@ class Person(Player):
     def buy_phase(self):
         pass
 
-    def gain_card_up_to_helper(self, limit):
-        return Follow_Up(1, {"gain_card_limit": limit})
+    def gain_card_up_to(self, limit):
+        return Follow_Up(1, self, {"gain_card_limit": limit})

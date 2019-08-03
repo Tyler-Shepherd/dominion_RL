@@ -167,14 +167,5 @@ class Player:
         return False
 
     def gain_card_up_to(self, limit):
-        # I dont think this works
-        # new plan:
-            # make gain_card_up_to itself abstract
-            # include dominion_utils.gain_card as part of dominion_agent.gain_card_up_to
-            # then do follow_up for person.py
-        card_to_gain = self.gain_card_up_to_helper(limit)
-        dominion_utils.gain_card(self, card_to_gain, self.kingdom)
-
-    def gain_card_up_to_helper(self, limit):
         assert 1==2 # this shouldn't be called, should be implemented in child classes
         pass
