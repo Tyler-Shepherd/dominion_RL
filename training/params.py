@@ -1,9 +1,9 @@
 import datetime
 
 debug_mode = 3
-max_card_id = 13
+max_card_id = 14
 
-checkpoint_filename = "../training/results/142489282_val_init.pth.tar"
+checkpoint_filename = "../training/results/995750440_val_init.pth.tar"
 
 num_train_kingdoms = 80
 num_test_kingdoms = 20
