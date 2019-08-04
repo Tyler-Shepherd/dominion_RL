@@ -85,7 +85,9 @@ def play_card():
 
     data = {"hand": dominion_utils.cards_to_string(person.hand), "action_cards": action_cards_data,
             "kingdom": dominion_utils.kingdom_to_string(kingdom), "num_actions": person.num_actions,
-            "num_buys": person.num_buys, "follow_up": follow_up_action.serialize()}
+            "num_buys": person.num_buys}
+    data["follow_up"] = follow_up_action.serialize() if follow_up_action else None
+
     data = json.dumps(data)
     resp = Response(data, status=200, mimetype='application/json')
     return resp
@@ -137,7 +139,8 @@ def get_agent_action():
     data = {"kingdom": dominion_utils.kingdom_to_string(kingdom),
             "end_action_phase": played_card is None,
             "played_card": played_card.name if played_card else "",
-            "num_buys": agent.num_buys, "num_actions": agent.num_actions}
+            "num_buys": agent.num_buys, "num_actions": agent.num_actions,
+            "hand": dominion_utils.cards_to_string(person.hand)}
     data = json.dumps(data)
     resp = Response(data, status=200, mimetype='application/json')
     return resp

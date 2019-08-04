@@ -74,7 +74,7 @@ def generate_kingdom():
         else:
             new_kingdom[i] = 0
 
-    # new_kingdom[12] = 10
+    # new_kingdom[13] = 10
 
     return Kingdom(new_kingdom)
 

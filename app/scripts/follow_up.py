@@ -7,6 +7,7 @@ class Follow_Up:
             # Gain card up to
             self.gain_card_limit = props["gain_card_limit"]
             self.gainable_cards = dominion_utils.get_purchaseable_cards(self.gain_card_limit, person.kingdom)
+            # todo add None option
 
     def serialize(self):
         return {

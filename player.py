@@ -50,7 +50,7 @@ class Player:
                 cards_drawn.append(to_draw)
 
         if params.debug_mode == 3:
-            print("Drew: ", dominion_utils.cards_to_string(cards_drawn))
+            print(self.name, "drew", dominion_utils.cards_to_string(cards_drawn))
 
         return cards_drawn
 

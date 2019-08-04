@@ -107,7 +107,7 @@ class Dominion_Agent(Player):
 
             assert max_action is not None
 
-            # max_action = dominion_utils.force_buy(12, self, max_action)
+            # max_action = dominion_utils.force_buy(13, self, max_action)
 
             purchases.append((self.coins, max_action))
             dominion_utils.buy_card(self, max_action, self.kingdom)

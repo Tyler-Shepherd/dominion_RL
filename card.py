@@ -104,6 +104,11 @@ class Card:
             self.f_action = 1
             self.cost = 3
             self.name = "Workshop"
+        elif id == 13:
+            # Council Room
+            self.f_action = 1
+            self.cost = 5
+            self.name = "Council Room"
 
     def play(self, player):
         assert self.f_action
@@ -136,5 +141,10 @@ class Card:
         elif self.id == 12:
             # Workshop
             return player.gain_card_up_to(4)
+        elif self.id == 13:
+            # Council Room
+            player.draw(4)
+            player.plus_buys(1)
+            player.opponent.draw(1)
         else:
             raise Exception('Unknown card id to be played')

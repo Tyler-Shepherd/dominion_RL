@@ -154,6 +154,7 @@ app.controller('DominionAIController', ['$log', '$http',
 
             ctrl.num_buys = response.data.num_buys;
             ctrl.num_actions = response.data.num_actions;
+            ctrl.person_hand = response.data.hand;
         });
     }
 
