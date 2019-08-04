@@ -105,6 +105,8 @@ class RL_base():
         else:
             reward_val = (self.agent.num_victory_points() - self.opponent.num_victory_points()) + 48
 
+        if params.debug_mode >= 3:
+            print("Reward", reward_val)
         return torch.tensor(reward_val, dtype = torch.float32)
 
     def get_agent_buy_policy(self):

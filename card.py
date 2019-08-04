@@ -114,6 +114,14 @@ class Card:
             self.f_action = 1
             self.cost = 5
             self.name = "Market"
+        elif id == 15:
+            # Harem
+            self.f_treasure = 1
+            self.f_victory = 1
+            self.victory_value = 2
+            self.coin_value = 2
+            self.cost = 6
+            self.name = "Harem"
 
     def play(self, player):
         assert self.f_action
