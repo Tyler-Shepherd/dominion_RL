@@ -74,7 +74,7 @@ def generate_kingdom():
         else:
             new_kingdom[i] = 0
 
-    # new_kingdom[13] = 10
+    new_kingdom[16] = 10
 
     return Kingdom(new_kingdom)
 
@@ -187,3 +187,22 @@ def force_buy(card_id, player, old_choice):
     if player.coins >= Card(card_id).cost and player.kingdom.supply[card_id] > 0:
         return Card(card_id)
     return old_choice
+
+def discard_card(discarded_card, player):
+    player.hand.remove(discarded_card)
+    player.discard.append(discarded_card)
+    if params.debug_mode >= 3:
+        print(player.name, "discarded", discarded_card.name)
+
+def generic_discard_down_to(player, handsize):
+    num_to_discard = len(player.hand) - handsize
+    for i in range(num_to_discard):
+        discarded_card = next((x for x in player.hand if x.f_curse), None)
+        if not discarded_card:
+            discarded_card = next((x for x in player.hand if (x.f_victory and not x.f_treasure)), None)
+        if not discarded_card:
+            discarded_card = min(player.hand, key=lambda x: x.cost)
+
+        assert discarded_card is not None
+
+        discard_card(discarded_card, player)

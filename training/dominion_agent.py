@@ -146,3 +146,7 @@ class Dominion_Agent(Player):
         gainable = dominion_utils.get_purchaseable_cards(limit, self.kingdom)
         card_to_gain = random.choice(gainable)
         dominion_utils.gain_card(self, card_to_gain, self.kingdom)
+
+    def discard_down_to(self, handsize):
+        # todo policy for this
+        dominion_utils.generic_discard_down_to(self, handsize)

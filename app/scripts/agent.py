@@ -32,6 +32,8 @@ class Agent(Player):
         print("Loaded model from " + params.checkpoint_filename)
 
     # Returns played card, or None if agent is ending action phase
+    # Not really the full action phase, just next card to be played
+    # TODO return follow up
     def action_phase(self):
         action_cards = [card for card in self.hand if card.f_action]
         print("Agent hand action phase: ", dominion_utils.cards_to_string(self.hand))
@@ -41,11 +43,11 @@ class Agent(Player):
             card_to_play = action_cards.pop()
             self.hand.remove(card_to_play)
             self.in_play.append(card_to_play)
-            card_to_play.play(self)
+            follow_up = card_to_play.play(self)
             self.num_actions -= 1
-            return card_to_play
+            return card_to_play, follow_up
         else:
-            return None
+            return None, None
 
     def buy_phase(self):
         assert self.num_buys >= 0
@@ -73,7 +75,7 @@ class Agent(Player):
 
         assert max_action is not None
 
-        # max_action = dominion_utils.force_buy(13, self, max_action)
+        max_action = dominion_utils.force_buy(16, self, max_action)
 
         print("Agent buying", max_action.name)
 
@@ -89,3 +91,7 @@ class Agent(Player):
         gainable = dominion_utils.get_purchaseable_cards(limit, self.kingdom)
         card_to_gain = random.choice(gainable)
         dominion_utils.gain_card(self, card_to_gain, self.kingdom)
+
+    def discard_down_to(self, handsize):
+        # todo policy for this
+        dominion_utils.generic_discard_down_to(self, handsize)

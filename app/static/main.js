@@ -155,6 +155,13 @@ app.controller('DominionAIController', ['$log', '$http',
             ctrl.num_buys = response.data.num_buys;
             ctrl.num_actions = response.data.num_actions;
             ctrl.person_hand = response.data.hand;
+
+            if (response.data.follow_up) {
+                ctrl.follow_up = response.data.follow_up;
+                ctrl.follow_up_active = true;
+                $log.log("Follow up action");
+                $log.log(ctrl.follow_up);
+            }
         });
     }
 

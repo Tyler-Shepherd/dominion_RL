@@ -44,7 +44,18 @@
 
         <br>
 
-        <button ng-click="ctrl.agentNext()">Next</button>
+        <div ng-if="ctrl.follow_up_active">
+            <span ng-if="ctrl.follow_up.type == 2">
+                Discard down to {[ctrl.follow_up.new_handsize]}:
+                <span ng-repeat="card in ctrl.person_hand">
+                    <button ng-click="ctrl.followUpDiscard(card.id")>{[card.name}]</button>
+                </span>
+            </span>
+        </div>
+
+        <div ng-if="!ctrl.follow_up_active">
+            <button ng-click="ctrl.agentNext()">Next</button>
+        </div>
     </div>
 
     <div ng-if="ctrl.play_phase === -2">

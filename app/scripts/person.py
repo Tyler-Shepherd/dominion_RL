@@ -24,3 +24,6 @@ class Person(Player):
 
     def gain_card_up_to(self, limit):
         return Follow_Up(1, self, {"gain_card_limit": limit})
+
+    def discard_down_to(self, handsize):
+        return Follow_Up(2, self, {"handsize": handsize})

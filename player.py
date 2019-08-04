@@ -169,3 +169,7 @@ class Player:
     def gain_card_up_to(self, limit):
         assert 1==2 # this shouldn't be called, should be implemented in child classes
         pass
+
+    def discard_down_to(self, handsize):
+        assert 1==2 # this shouldn't be called, should be implemented in child classes
+        pass

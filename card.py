@@ -122,15 +122,21 @@ class Card:
             self.coin_value = 2
             self.cost = 6
             self.name = "Harem"
+        elif id == 16:
+            # Militia
+            self.f_action = 1
+            self.f_attack = 1
+            self.cost = 4
+            self.name = "Militia"
 
     def play(self, player):
         assert self.f_action
 
-        # Trigger reactions if this is an Attack card
-        opponent_unnaffected = player.opponent.attack_played() if self.f_attack else None
-
         if params.debug_mode >= 2:
             print("Playing", self.name)
+
+        # Trigger reactions if this is an Attack card
+        opponent_unnaffected = player.opponent.attack_played() if self.f_attack else None
 
         if self.id == 7:
             # Smithy
@@ -165,5 +171,10 @@ class Card:
             player.plus_actions(1)
             player.plus_buys(1)
             player.plus_coins(1)
+        elif self.id == 16:
+            # Militia
+            player.plus_coins(2)
+            if not opponent_unnaffected:
+                return player.opponent.discard_down_to(3)
         else:
             raise Exception('Unknown card id to be played')

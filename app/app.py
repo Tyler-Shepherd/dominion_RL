@@ -134,13 +134,14 @@ def end_agent_turn():
 def get_agent_action():
     global kingdom, person, agent
 
-    played_card = agent.action_phase()
+    played_card, follow_up = agent.action_phase()
 
     data = {"kingdom": dominion_utils.kingdom_to_string(kingdom),
             "end_action_phase": played_card is None,
             "played_card": played_card.name if played_card else "",
             "num_buys": agent.num_buys, "num_actions": agent.num_actions,
             "hand": dominion_utils.cards_to_string(person.hand)}
+    data["follow_up"] = follow_up.serialize() if follow_up else None
     data = json.dumps(data)
     resp = Response(data, status=200, mimetype='application/json')
     return resp
@@ -180,6 +181,12 @@ def start_game():
     # 1 if agent turn
     # -1 if opponent turn
     whose_turn = kingdom.starting_player
+
+    # TODO need to return serialized cards as "hand" instead of the string
+    # then add a new .js file for utils
+    # and implement cards_to_string there as well
+    # and set view to display cards_to_string(hand)
+    # then in discard follow_up can actually do ng-repeat on serialized cards
 
     data = {"turn": kingdom.turn_num, "hand": dominion_utils.cards_to_string(person.hand), "kingdom": dominion_utils.kingdom_to_string(kingdom), "play_phase": whose_turn}
     data = json.dumps(data)
