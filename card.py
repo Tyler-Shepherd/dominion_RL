@@ -154,6 +154,7 @@ class Card:
             player.draw(2)
             if not opponent_unnaffected:
                 player.opponent.discard.append(Card(6))
+                player.kingdom.gain_card(Card(6))
         elif self.id == 11:
             # Moat
             player.draw(2)

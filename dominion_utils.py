@@ -69,12 +69,12 @@ def generate_kingdom():
 
     # TODO eventually need to randomly select 10 cards for the kingdom
     for i in range(7, params.max_card_id+1):
-        if random.random() < 0.5:
+        if random.random() < 0.2:
             new_kingdom[i] = 10
         else:
             new_kingdom[i] = 0
 
-    new_kingdom[16] = 10
+    # new_kingdom[16] = 10
 
     return Kingdom(new_kingdom)
 
