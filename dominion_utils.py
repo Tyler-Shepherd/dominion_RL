@@ -189,7 +189,9 @@ def force_buy(card_id, player, old_choice):
     return old_choice
 
 def discard_card(discarded_card, player):
-    player.hand.remove(discarded_card)
+    actual_discard = next(card for card in player.hand if card.id == discarded_card.id)
+    assert actual_discard is not None
+    player.hand.remove(actual_discard)
     player.discard.append(discarded_card)
     if params.debug_mode >= 3:
         print(player.name, "discarded", discarded_card.name)

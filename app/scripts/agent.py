@@ -75,7 +75,7 @@ class Agent(Player):
 
         assert max_action is not None
 
-        max_action = dominion_utils.force_buy(16, self, max_action)
+        # max_action = dominion_utils.force_buy(16, self, max_action)
 
         print("Agent buying", max_action.name)
 

@@ -1,3 +1,11 @@
+cards_to_string = function(cards) {
+    let c_str = '';
+    for(i=0; i<cards.length; i++) {
+        c_str += cards[i].name + " ";
+    }
+    return c_str;
+}
+
 var app = angular.module('DominionAI', []);
 
 app.config(['$interpolateProvider', function($interpolateProvider) {
@@ -13,6 +21,7 @@ app.controller('DominionAIController', ['$log', '$http',
   ctrl.play_log = "Press to Start";
   ctrl.turn_num = -1;
   ctrl.person_hand = "";
+  ctrl.person_hand_serialized = [];
   ctrl.kingdom = "";
 
   //num_actions and num_buys are just views of data from server, not set by client
@@ -66,7 +75,8 @@ app.controller('DominionAIController', ['$log', '$http',
         ctrl.num_actions = response.data.num_actions;
         ctrl.kingdom = response.data.kingdom;
         ctrl.action_cards = response.data.action_cards;
-        ctrl.person_hand = response.data.hand;
+        ctrl.person_hand = cards_to_string(response.data.hand);
+        ctrl.person_hand_serialized = response.data.hand;
         ctrl.num_buys = response.data.num_buys;
 
         if (response.data.follow_up) {
@@ -94,7 +104,8 @@ app.controller('DominionAIController', ['$log', '$http',
         }
 
         ctrl.turn_num = response.data.turn;
-        ctrl.person_hand = response.data.hand;
+        ctrl.person_hand = cards_to_string(response.data.hand);
+        ctrl.person_hand_serialized = response.data.hand;
         ctrl.kingdom = response.data.kingdom;
 
         // Agent num_buys and num_actions
@@ -113,7 +124,8 @@ app.controller('DominionAIController', ['$log', '$http',
         ctrl.gameNotStarted = false;
         ctrl.play_phase = response.data.play_phase;
         ctrl.turn_num = response.data.turn;
-        ctrl.person_hand = response.data.hand;
+        ctrl.person_hand = cards_to_string(response.data.hand);
+        ctrl.person_hand_serialized = response.data.hand;
         ctrl.kingdom = response.data.kingdom;
         $http.get('/get_action_cards').then(function(response) {
             $log.log(response);
@@ -154,7 +166,8 @@ app.controller('DominionAIController', ['$log', '$http',
 
             ctrl.num_buys = response.data.num_buys;
             ctrl.num_actions = response.data.num_actions;
-            ctrl.person_hand = response.data.hand;
+            ctrl.person_hand = cards_to_string(response.data.hand);
+            ctrl.person_hand_serialized = response.data.hand;
 
             if (response.data.follow_up) {
                 ctrl.follow_up = response.data.follow_up;
@@ -188,7 +201,8 @@ app.controller('DominionAIController', ['$log', '$http',
                     }
 
                     ctrl.turn_num = response.data.turn;
-                    ctrl.person_hand = response.data.hand;
+                    ctrl.person_hand = cards_to_string(response.data.hand);
+                    ctrl.person_hand_serialized = response.data.hand;
                     ctrl.kingdom = response.data.kingdom;
                     ctrl.num_buys = response.data.num_buys;
                     ctrl.num_actions = response.data.num_actions;
@@ -210,8 +224,31 @@ app.controller('DominionAIController', ['$log', '$http',
       .then(function(response) {
         $log.log(response);
         ctrl.kingdom = response.data.kingdom;
-        // todo eventually actions will have multiple follow ups and wont just be able to set active to false here
-        ctrl.follow_up_active = false;
+
+        ctrl.follow_up.remaining -= 1;
+        if (ctrl.follow_up.remaining == 0) {
+            ctrl.follow_up_active = false;
+        }
+       })
+      .catch(function(error) {
+        $log.log(error);
+      });
+  };
+
+  ctrl.followUpDiscard = function(card_to_discard) {
+    $log.log("Follow up discard " + card_to_discard);
+
+    $http.post('/discard', {"to_discard": card_to_discard})
+      .then(function(response) {
+        $log.log(response);
+        ctrl.kingdom = response.data.kingdom;
+        ctrl.person_hand = cards_to_string(response.data.hand);
+        ctrl.person_hand_serialized = response.data.hand;
+
+        ctrl.follow_up.remaining -= 1;
+        if (ctrl.follow_up.remaining == 0) {
+            ctrl.follow_up_active = false;
+        }
        })
       .catch(function(error) {
         $log.log(error);

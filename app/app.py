@@ -43,7 +43,7 @@ def buy():
 
     dominion_utils.buy_card(person, card_to_buy, kingdom)
 
-    data = {"turn": kingdom.turn_num, "hand": dominion_utils.cards_to_string(person.hand),
+    data = {"turn": kingdom.turn_num, "hand": dominion_utils.serialize_cards(person.hand),
             "kingdom": dominion_utils.kingdom_to_string(kingdom), "num_buys": person.num_buys}
     data = json.dumps(data)
     resp = Response(data, status=200, mimetype='application/json')
@@ -59,7 +59,25 @@ def gain():
 
     dominion_utils.gain_card(person, card_to_gain, kingdom)
 
-    data = {"turn": kingdom.turn_num, "hand": dominion_utils.cards_to_string(person.hand),
+    data = {"turn": kingdom.turn_num, "hand": dominion_utils.serialize_cards(person.hand),
+            "kingdom": dominion_utils.kingdom_to_string(kingdom)}
+    data = json.dumps(data)
+    resp = Response(data, status=200, mimetype='application/json')
+    return resp
+
+@app.route('/discard', methods=['POST'])
+def discard():
+    global kingdom, person, agent
+    data = json.loads(request.data.decode())
+    card_to_discard = Card(data['to_discard'])
+
+    app.logger.info("Discard " + card_to_discard.name)
+    print(card_to_discard)
+    print(person.hand)
+
+    dominion_utils.discard_card(card_to_discard, person)
+
+    data = {"turn": kingdom.turn_num, "hand": dominion_utils.serialize_cards(person.hand),
             "kingdom": dominion_utils.kingdom_to_string(kingdom)}
     data = json.dumps(data)
     resp = Response(data, status=200, mimetype='application/json')
@@ -83,7 +101,7 @@ def play_card():
     action_cards = [card for card in person.hand if card.f_action]
     action_cards_data = dominion_utils.serialize_cards(action_cards)
 
-    data = {"hand": dominion_utils.cards_to_string(person.hand), "action_cards": action_cards_data,
+    data = {"hand": dominion_utils.serialize_cards(person.hand), "action_cards": action_cards_data,
             "kingdom": dominion_utils.kingdom_to_string(kingdom), "num_actions": person.num_actions,
             "num_buys": person.num_buys}
     data["follow_up"] = follow_up_action.serialize() if follow_up_action else None
@@ -104,7 +122,7 @@ def end_turn():
     elif kingdom.starting_player == -1:
         kingdom.next_turn()
 
-    data = {"turn": kingdom.turn_num, "hand": dominion_utils.cards_to_string(person.hand),
+    data = {"turn": kingdom.turn_num, "hand": dominion_utils.serialize_cards(person.hand),
             "kingdom": dominion_utils.kingdom_to_string(kingdom), "game_over": game_over,
             "num_buys": agent.num_buys, "num_actions": agent.num_actions}
     data = json.dumps(data)
@@ -123,7 +141,7 @@ def end_agent_turn():
     elif kingdom.starting_player == 1:
         kingdom.next_turn()
 
-    data = {"turn": kingdom.turn_num, "hand": dominion_utils.cards_to_string(person.hand),
+    data = {"turn": kingdom.turn_num, "hand": dominion_utils.serialize_cards(person.hand),
             "kingdom": dominion_utils.kingdom_to_string(kingdom), "game_over": game_over,
             "num_buys": person.num_buys, "num_actions": person.num_actions}
     data = json.dumps(data)
@@ -140,7 +158,7 @@ def get_agent_action():
             "end_action_phase": played_card is None,
             "played_card": played_card.name if played_card else "",
             "num_buys": agent.num_buys, "num_actions": agent.num_actions,
-            "hand": dominion_utils.cards_to_string(person.hand)}
+            "hand": dominion_utils.serialize_cards(person.hand)}
     data["follow_up"] = follow_up.serialize() if follow_up else None
     data = json.dumps(data)
     resp = Response(data, status=200, mimetype='application/json')
@@ -182,13 +200,7 @@ def start_game():
     # -1 if opponent turn
     whose_turn = kingdom.starting_player
 
-    # TODO need to return serialized cards as "hand" instead of the string
-    # then add a new .js file for utils
-    # and implement cards_to_string there as well
-    # and set view to display cards_to_string(hand)
-    # then in discard follow_up can actually do ng-repeat on serialized cards
-
-    data = {"turn": kingdom.turn_num, "hand": dominion_utils.cards_to_string(person.hand), "kingdom": dominion_utils.kingdom_to_string(kingdom), "play_phase": whose_turn}
+    data = {"turn": kingdom.turn_num, "hand": dominion_utils.serialize_cards(person.hand), "kingdom": dominion_utils.kingdom_to_string(kingdom), "play_phase": whose_turn}
     data = json.dumps(data)
     resp = Response(data, status=200, mimetype='application/json')
     return resp
