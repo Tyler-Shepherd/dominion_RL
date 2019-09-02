@@ -6,8 +6,10 @@ import numpy as np
 
 import training.params as params
 from training.RL_base import RL_base
+from training.RL_DAgger import  RL_DAgger
 from training.dominion_agent import Dominion_Agent
 from training.opponents.buy_only_treasure import Buy_Only_Treasure_Opponent
+from training.opponents.dummy import Dummy_Opponent
 from kingdom import Kingdom
 import dominion_utils
 
@@ -28,7 +30,8 @@ def test_model(test_output_file, test_output_full_file, base, test_kingdoms, num
         print("---------------Test " + str(num_times_tested) + "----------------")
 
     for test_kingdom in test_kingdoms:
-        player_won, test_num_turns, player_vp, opp_vp = base.test_agent(Buy_Only_Treasure_Opponent(), test_kingdom, test_output_full_file)
+        # player_won, test_num_turns, player_vp, opp_vp = base.test_agent(Buy_Only_Treasure_Opponent(), test_kingdom, test_output_full_file)
+        player_won, test_num_turns, player_vp, opp_vp = base.test_agent(Dummy_Opponent(), test_kingdom, test_output_full_file)
 
         num_won += player_won
         num_total_turns += test_num_turns
@@ -91,7 +94,8 @@ if __name__ == '__main__':
 
     # Make agent and base
     agent = Dominion_Agent(loss_file)
-    base = RL_base(agent)
+    # base = RL_base(agent)
+    base = RL_DAgger(agent)
 
     # Counter variables
     i = 0
@@ -130,7 +134,7 @@ if __name__ == '__main__':
     num_times_tested = 0
 
     agent.save_model("training/results/" + str(model_id) + "_val_init.pth.tar")
-    test_model(val_file, val_full_file, base, val_kingdoms, -1, True)
+    # test_model(val_file, val_full_file, base, val_kingdoms, -1, True)
 
     for epoch in range(params.num_epochs):
         i = 0
@@ -140,7 +144,8 @@ if __name__ == '__main__':
         random.shuffle(train_kingdoms)
 
         for kingdom in train_kingdoms:
-            opponent = Buy_Only_Treasure_Opponent()
+            # opponent = Buy_Only_Treasure_Opponent()
+            opponent = Dummy_Opponent()
 
             # Run the agent on kingdom against opponent
             start = time.perf_counter()
@@ -167,7 +172,8 @@ if __name__ == '__main__':
         if epoch % params.test_on_val_every_epochs == 0:
             agent.save_model("training/results/" + str(model_id) + "_val_" + str(num_times_tested) + '.pth.tar')
             win_percent, avg_vp_diff = test_model(val_file, val_full_file, base, val_kingdoms, num_times_tested, True)
-            val_results.append(avg_vp_diff)
+            # val_results.append(avg_vp_diff)
+            val_results.append(win_percent)
             num_times_tested += 1
 
     print('----------------------Training Done------------------------------')

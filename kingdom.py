@@ -66,3 +66,14 @@ class Kingdom:
             return 2
 
         return -1
+
+    def serialize(self):
+        serialized_kingdom = []
+
+        # TODO
+
+
+        return tuple(serialized_kingdom)
+
+
+    def unserialize(self):

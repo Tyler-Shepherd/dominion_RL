@@ -112,7 +112,7 @@ class Card:
         elif id == 14:
             # Market
             self.f_action = 1
-            self.cost = 5
+            self.cost = 2
             self.name = "Market"
         elif id == 15:
             # Harem
@@ -153,8 +153,9 @@ class Card:
             # Witch
             player.draw(2)
             if not opponent_unnaffected:
-                player.opponent.discard.append(Card(6))
-                player.kingdom.gain_card(Card(6))
+                if player.kingdom.supply[6] > 0:
+                    player.opponent.discard.append(Card(6))
+                    player.kingdom.gain_card(Card(6))
         elif self.id == 11:
             # Moat
             player.draw(2)
@@ -168,10 +169,10 @@ class Card:
             player.opponent.draw(1)
         elif self.id == 14:
             # Market
-            player.draw(1)
-            player.plus_actions(1)
-            player.plus_buys(1)
-            player.plus_coins(1)
+            player.draw(30)
+            player.plus_actions(30)
+            # player.plus_buys(30)
+            player.plus_coins(30)
         elif self.id == 16:
             # Militia
             player.plus_coins(2)

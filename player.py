@@ -3,6 +3,7 @@ import copy
 from card import Card
 import training.params as params
 import dominion_utils
+from player_state import Player_State
 
 # Abstract base class that describes a player
 # Defines current state of deck, hand, and discard
@@ -126,36 +127,22 @@ class Player:
 
     def get_state(self):
         # state is of form [hand, deck, discard, in play, opp hand, opp deck, opp discard, kingdom, num_actions]
-        current_state = []
-        current_state.append(self.hand.copy())
-        current_state.append(self.deck.copy())
-        current_state.append(self.discard.copy())
-        current_state.append(self.in_play.copy())
-        current_state.append(self.opponent.hand.copy())
-        current_state.append(self.opponent.deck.copy())
-        current_state.append(self.opponent.discard.copy())
-        current_state.append(copy.deepcopy(self.kingdom))
-        current_state.append(self.num_actions)
-        current_state.append(self.num_buys)
-        current_state.append(self.coins)
-
-        return current_state
+        return Player_State(self)
 
     def set_state(self, new_state):
         # Note: you can't set state and then continue playing an actual game since opponent won't have Kingdom updated (maybe????)
         # Only used for getting and updating q values
-        assert len(new_state) == 11
-        self.hand = new_state[0]
-        self.deck = new_state[1]
-        self.discard = new_state[2]
-        self.in_play = new_state[3]
-        self.opponent.hand = new_state[4]
-        self.opponent.deck = new_state[5]
-        self.opponent.discard = new_state[6]
-        self.kingdom = new_state[7]
-        self.num_actions = new_state[8]
-        self.num_buys = new_state[9]
-        self.coins = new_state[10]
+        self.hand = new_state.hand
+        self.deck = new_state.deck
+        self.discard = new_state.discard
+        self.in_play = new_state.in_play
+        self.opponent.hand = new_state.opponent_hand
+        self.opponent.deck = new_state.opponent_deck
+        self.opponent.discard = new_state.opponent_discard
+        self.kingdom = new_state.kingdom
+        self.num_actions = new_state.num_actions
+        self.num_buys = new_state.num_buys
+        self.coins = new_state.coins
 
     def attack_played(self):
         # TODO give choice of playing reactions (especially in app)

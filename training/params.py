@@ -1,6 +1,6 @@
 import datetime
 
-debug_mode = 3
+debug_mode = 0
 max_card_id = 16
 
 checkpoint_filename = "../training/results/267358066_val_init.pth.tar"
@@ -9,11 +9,11 @@ num_train_kingdoms = 80
 num_test_kingdoms = 20
 num_val_kingdoms = 20
 
-num_epochs = 10000              # Num times to iterate over all training kingdoms
+num_epochs = 2           # Num times to iterate over all training kingdoms
 num_training_iterations = 1     # Num times to train on each kingdom
 test_on_val_every_epochs = 100  # After how many epochs to test against validation data
 
-learning_rate = 0.0001
+learning_rate = 0.001
 
 f_learning_rate_decay = 0
 learning_rate_start = 0.8
@@ -24,7 +24,7 @@ discount_factor = 0.95
 
 # Boltzmann Exploration Parameters
 tau_start = 1.0
-tau_end = 0.2
+tau_end = 0.05
 tau_decay = 10000000
 
 # Updates every x experience replay trainings
@@ -37,9 +37,18 @@ buffer_size = 500
 unusual_sample_factor = 0.4
 batch_size = 100
 
-D_in = 11 + (max_card_id + 2) + (max_card_id + 1) + (max_card_id + 1) + (max_card_id + 1) + 1 + (max_card_id + 1)
-H = 64
+# D_in = 11 + (max_card_id + 2) + (max_card_id + 1) + (max_card_id + 1) + (max_card_id + 1) + 1 + (max_card_id + 1)
+D_in = max_card_id + 1 + max_card_id + 2
+H = 32
 D_out = 1
+
+
+# DAgger
+num_dagger_iterations = 1 # num iterations on each kingdom/opponent pair
+num_dagger_samples = 3 # num games to play each iteration
+exploration_p = 0.8 # at iteration i, strategy sampling explores with prob exploration_p ^ i (so first iteration with i = 0 is pure exploration)
+
+
 
 # Print parameters
 def print_params(parameters_file):

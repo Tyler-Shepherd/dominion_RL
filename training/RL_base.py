@@ -95,15 +95,17 @@ class RL_base():
     '''
     RL reward is the difference in score between player and opponent at end of game
     '''
-    def reward(self):
+    def reward(self, bought_card):
         current_state = self.at_goal_state()
         if current_state == -1:
             # Not a goal state
             # reward_val =  self.agent.coins / 8
-            reward_val = 0
+            # reward_val = 0
             # reward_val = (self.agent.num_victory_points() - self.opponent.num_victory_points()) + 48
+            reward_val = self.agent.coins + 10 if bought_card.id == 5 else self.agent.coins
         else:
-            reward_val = (self.agent.num_victory_points() - self.opponent.num_victory_points()) + 48
+            # reward_val = (self.agent.num_victory_points() - self.opponent.num_victory_points()) + 48
+            reward_val = 100 if self.agent.num_victory_points() > self.opponent.num_victory_points() else self.agent.num_victory_points()
 
         if params.debug_mode >= 3:
             print("Reward", reward_val)
@@ -235,7 +237,7 @@ class RL_base():
         if params.debug_mode >= 2:
             print("Agent buying", a.name)
 
-        new_reward = self.reward()
+        new_reward = self.reward(a)
         self.current_experience.append(new_reward)
 
     '''
