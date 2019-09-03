@@ -1,19 +1,19 @@
 import datetime
 
-debug_mode = 0
+debug_mode = 1
 max_card_id = 16
 
 checkpoint_filename = "../training/results/267358066_val_init.pth.tar"
 
-num_train_kingdoms = 80
+num_train_kingdoms = 10
 num_test_kingdoms = 20
 num_val_kingdoms = 20
 
-num_epochs = 2           # Num times to iterate over all training kingdoms
+num_epochs = 100           # Num times to iterate over all training kingdoms
 num_training_iterations = 1     # Num times to train on each kingdom
-test_on_val_every_epochs = 100  # After how many epochs to test against validation data
+test_on_val_every_epochs = 10  # After how many epochs to test against validation data
 
-learning_rate = 0.001
+learning_rate = 0.0001
 
 f_learning_rate_decay = 0
 learning_rate_start = 0.8
@@ -44,9 +44,8 @@ D_out = 1
 
 
 # DAgger
-num_dagger_iterations = 1 # num iterations on each kingdom/opponent pair
+num_dagger_iterations = 10 # num iterations on each kingdom/opponent pair
 num_dagger_samples = 3 # num games to play each iteration
-exploration_p = 0.8 # at iteration i, strategy sampling explores with prob exploration_p ^ i (so first iteration with i = 0 is pure exploration)
 
 
 
@@ -82,6 +81,9 @@ def print_params(parameters_file):
     parameters_file.write("D_in\t" + str(D_in) + '\n')
     parameters_file.write("H\t" + str(H) + '\n')
     parameters_file.write("D_out\t" + str(D_out) + '\n')
+
+    parameters_file.write("num_dagger_iterations\t" + str(num_dagger_iterations) + '\n')
+    parameters_file.write("num_dagger_samples\t" + str(num_dagger_samples) + '\n')
 
     parameters_file.write("Date\t" + str(datetime.datetime.now()) + '\n')
 

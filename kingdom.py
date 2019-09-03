@@ -67,13 +67,11 @@ class Kingdom:
 
         return -1
 
-    def serialize(self):
-        serialized_kingdom = []
+    def __eq__(self, other):
+        return self.supply == other.supply and self.turn_num == other.turn_num and self.starting_player == other.starting_player
 
-        # TODO
+    def __ne__(self, other):
+        return not (self == other)
 
-
-        return tuple(serialized_kingdom)
-
-
-    def unserialize(self):
+    def __hash__(self):
+        return 0

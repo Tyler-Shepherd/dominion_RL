@@ -38,5 +38,10 @@ class Dummy_Opponent(Player):
             card_to_play.play(self)
             action_cards = [card for card in self.hand if card.f_action]
 
+    def gain_card_up_to(self, limit):
+        gainable = dominion_utils.get_purchaseable_cards(limit, self.kingdom)
+        card_to_gain = random.choice(gainable)
+        dominion_utils.gain_card(self, card_to_gain, self.kingdom)
+
     def discard_down_to(self, handsize):
         dominion_utils.generic_discard_down_to(self, handsize)

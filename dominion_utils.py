@@ -69,13 +69,10 @@ def generate_kingdom():
 
     # TODO eventually need to randomly select 10 cards for the kingdom
     for i in range(7, params.max_card_id+1):
-        new_kingdom[i] = 0
-        # if random.random() < 0.2:
-        #     new_kingdom[i] = 10
-        # else:
-        #     new_kingdom[i] = 0
-
-    new_kingdom[14] = 10
+        if random.random() < 0.2:
+            new_kingdom[i] = 10
+        else:
+            new_kingdom[i] = 0
 
     return Kingdom(new_kingdom)
 
@@ -213,3 +210,18 @@ def generic_discard_down_to(player, handsize):
         assert discarded_card is not None
 
         discard_card(discarded_card, player)
+
+def cards_equivalent(cards1, cards2):
+    num_cards_1 = {}
+    for c in cards1:
+        if c.id not in num_cards_1:
+            num_cards_1[c.id] = 0
+        num_cards_1[c.id] += 1
+
+    num_cards_2 = {}
+    for c in cards2:
+        if c.id not in num_cards_2:
+            num_cards_2[c.id] = 0
+        num_cards_2[c.id] += 1
+
+    return num_cards_1 == num_cards_2

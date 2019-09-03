@@ -96,6 +96,8 @@ class RL_base():
     RL reward is the difference in score between player and opponent at end of game
     '''
     def reward(self, bought_card):
+        assert "hey" == "this reward makes no sense since tanh has range (-1,1), either update or use RELU"
+
         current_state = self.at_goal_state()
         if current_state == -1:
             # Not a goal state

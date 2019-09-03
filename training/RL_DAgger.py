@@ -59,7 +59,14 @@ class RL_DAgger():
         current_state = self.at_goal_state()
 
         assert current_state > 0
-        reward_val = 100 if self.agent.num_victory_points() > self.opponent.num_victory_points() else self.agent.num_victory_points()
+        # 83 is the maximum point value if you get all provinces, all duchies, and all estates
+        # -10 is lowest possible score if you have all curses and no victory
+        reward_val = 1 if self.agent.num_victory_points() > self.opponent.num_victory_points() else ((self.agent.num_victory_points() + 10) / (83 + 10))
+
+        if not 0 <= reward_val <= 1:
+            print(reward_val)
+            print(self.agent.num_victory_points())
+        assert 0 <= reward_val <= 1
 
         if params.debug_mode >= 3:
             print("Reward", reward_val)
@@ -126,10 +133,10 @@ class RL_DAgger():
                 while self.agent.num_buys > 0:
                     card_to_purchase = self.get_agent_buy_policy()
 
+                    strategy.append((self.agent.get_state(), card_to_purchase.id))
+
                     # Take the action
                     self.agent_purchase(card_to_purchase)
-
-                    strategy.append((self.agent.get_state(), card_to_purchase.id))
 
                 self.agent.clean_up()
 
@@ -145,7 +152,7 @@ class RL_DAgger():
 
             whose_turn = whose_turn * -1
 
-        return strategy, self.reward()
+        return tuple(strategy), self.reward()
 
     '''
     Main reinforcement learning loop
@@ -160,17 +167,22 @@ class RL_DAgger():
 
         Q = {}  # strategy -> game reward
 
+        num_times_learned = 0
+
         for iter in range(params.num_dagger_iterations):
-            print("---------------Iteration " + str(iter) + '-----------------', flush=True)
+            if params.debug_mode >= 1:
+                print("---------------Iteration " + str(iter) + '-----------------', flush=True)
 
             # Sample strategies: play games
-            print("------Sampling Strategies-----------", flush=True)
+            if params.debug_mode >= 2:
+                print("------Sampling Strategies-----------", flush=True)
             with torch.no_grad():
                 for k in range(params.num_dagger_samples):
                     strategy, game_reward = self.sample_strategy()
                     Q[strategy] = max(Q[strategy], game_reward) if strategy in Q else game_reward
 
-            print("------Extracting Training Data-----------", flush=True)
+            if params.debug_mode >= 2:
+                print("------Extracting Training Data-----------", flush=True)
             R = {} # R is dictionary of game_state -> dict of bought_card -> best reward achieved by buying that card
             for (strategy, game_reward) in Q.items():
                 # strategy is list (Player State, bought_card id)
@@ -183,8 +195,8 @@ class RL_DAgger():
                     else:
                         R[s][c] = max(game_reward, R[s][c])
 
-
-            print("------Training Policy-----------", flush=True)
+            if params.debug_mode >= 2:
+                print("------Training Policy-----------", flush=True)
             # for each item in R, do q learning
             for (s, C) in R.items():
                 # s is state
@@ -193,8 +205,18 @@ class RL_DAgger():
 
                 for (card_id, game_reward) in C.items():
                     old_q_value = self.agent.get_Q_val(Card(card_id))
-
                     self.agent.update_q(self.learning_rate, old_q_value, game_reward)
+
+                # avg loss per sample
+                num_times_learned += 1
+                if num_times_learned == 100:
+                    loss_avg = self.agent.running_loss / 100
+                    print("LOSS {:f}".format(loss_avg))
+                    self.agent.loss_output_file.write(str(loss_avg) + '\n')
+                    self.agent.loss_output_file.flush()
+
+                    self.agent.running_loss = 0
+                    num_times_learned = 0
 
     '''
     Has agent purchase card a, saves experience in replay buffer

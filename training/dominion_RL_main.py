@@ -134,7 +134,7 @@ if __name__ == '__main__':
     num_times_tested = 0
 
     agent.save_model("training/results/" + str(model_id) + "_val_init.pth.tar")
-    # test_model(val_file, val_full_file, base, val_kingdoms, -1, True)
+    test_model(val_file, val_full_file, base, val_kingdoms, -1, True)
 
     for epoch in range(params.num_epochs):
         i = 0
