@@ -13,15 +13,7 @@ class Dummy_Opponent(Player):
         self.play_treasures()
         coins = self.coins
 
-        cards_purchasable = [Card(-1)]
-
-        for c in self.kingdom.supply.keys():
-            card = Card(c)
-            if card.cost <= coins and self.kingdom.supply[c] > 0:
-                cards_purchasable.append(card)
-
-        if params.debug_mode >= 2:
-            print("Opponent has", coins, "coins")
+        cards_purchasable = dominion_utils.get_purchaseable_cards(self, coins, self.kingdom)
 
         bought_card = random.choice(cards_purchasable)
         dominion_utils.buy_card(self, bought_card, self.kingdom)
@@ -39,7 +31,7 @@ class Dummy_Opponent(Player):
             action_cards = [card for card in self.hand if card.f_action]
 
     def gain_card_up_to(self, limit):
-        gainable = dominion_utils.get_purchaseable_cards(limit, self.kingdom)
+        gainable = dominion_utils.get_purchaseable_cards(self, limit, self.kingdom, True)
         card_to_gain = random.choice(gainable)
         dominion_utils.gain_card(self, card_to_gain, self.kingdom)
 

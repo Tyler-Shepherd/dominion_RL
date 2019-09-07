@@ -39,18 +39,8 @@ class Dominion_Agent(Player):
     def get_legal_actions(self):
         self.play_treasures()
         coins = self.coins
-        if params.debug_mode >= 2:
-            print(self.name, "has", coins, "coins")
 
-        cards_purchasable = []
-
-        # "skip" card
-        cards_purchasable.append(Card(-1))
-
-        for c in self.kingdom.supply.keys():
-            card = Card(c)
-            if card.cost <= coins and self.kingdom.supply[c] > 0:
-                cards_purchasable.append(card)
+        cards_purchasable = dominion_utils.get_purchaseable_cards(self, coins, self.kingdom)
 
         return cards_purchasable
 
@@ -140,7 +130,7 @@ class Dominion_Agent(Player):
         # todo eventually make this its own policy? or at least update q values based on this choice
         # todo make this a dominion_util function we can call in both dominion_agent.py and agent.py
 
-        gainable = dominion_utils.get_purchaseable_cards(limit, self.kingdom)
+        gainable = dominion_utils.get_purchaseable_cards(self, limit, self.kingdom, True)
         card_to_gain = random.choice(gainable)
         dominion_utils.gain_card(self, card_to_gain, self.kingdom)
 

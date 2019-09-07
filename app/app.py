@@ -39,8 +39,6 @@ def buy():
     data = json.loads(request.data.decode())
     card_to_buy = Card(data['to_buy'])
 
-    app.logger.info(person.name + " buying " + card_to_buy.name)
-
     dominion_utils.buy_card(person, card_to_buy, kingdom)
 
     data = {"turn": kingdom.turn_num, "hand": dominion_utils.serialize_cards(person.hand),
@@ -209,10 +207,8 @@ def start_game():
 def get_purchaseable_cards():
     global kingdom, person, agent
     person.play_treasures()
-    purchaseable_cards = dominion_utils.get_purchaseable_cards(person.coins, kingdom)
+    purchaseable_cards = dominion_utils.get_purchaseable_cards(person, person.coins, kingdom)
     purchaseable_cards_data = dominion_utils.serialize_cards(purchaseable_cards)
-
-    app.logger.info("Purchaseable: %s", str(purchaseable_cards_data))
 
     resp = Response(json.dumps(purchaseable_cards_data), status=200, mimetype='application/json')
     return resp

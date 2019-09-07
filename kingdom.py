@@ -34,6 +34,7 @@ class Kingdom:
         self.trash.append(card)
 
     def gain_card(self, card):
+        assert card.id > -1
         assert self.supply[card.id] > 0
         self.supply[card.id] -= 1
 

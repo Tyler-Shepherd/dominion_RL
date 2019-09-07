@@ -11,7 +11,7 @@ class Follow_Up:
         if type == 1:
             # Gain card up to
             self.gain_card_limit = props["gain_card_limit"]
-            self.gainable_cards = dominion_utils.get_purchaseable_cards(self.gain_card_limit, person.kingdom)
+            self.gainable_cards = dominion_utils.get_purchaseable_cards(person, self.gain_card_limit, person.kingdom, True)
             self.remaining = 1
             # todo add None option
         elif type == 2:

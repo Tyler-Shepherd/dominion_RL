@@ -57,8 +57,7 @@ class Agent(Player):
 
         self.play_treasures()
 
-        purchaseable_cards = dominion_utils.get_purchaseable_cards(self.coins, self.kingdom)
-        print("Agent purchaseable:", dominion_utils.cards_to_string(purchaseable_cards))
+        purchaseable_cards = dominion_utils.get_purchaseable_cards(self, self.coins, self.kingdom)
 
         max_action = None
         max_action_val = float("-inf")
@@ -86,7 +85,7 @@ class Agent(Player):
         # todo eventually make this its own policy? or at least update q values based on this choice
         # todo make this a dominion_util function we can call in both dominion_agent.py and agent.py
 
-        gainable = dominion_utils.get_purchaseable_cards(limit, self.kingdom)
+        gainable = dominion_utils.get_purchaseable_cards(self, limit, self.kingdom, True)
         card_to_gain = random.choice(gainable)
         dominion_utils.gain_card(self, card_to_gain, self.kingdom)
 

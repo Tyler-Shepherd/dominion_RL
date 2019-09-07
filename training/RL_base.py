@@ -83,6 +83,7 @@ class RL_base():
 
         if params.debug_mode >= 2:
             print("New Game")
+            self.kingdom.print_kingdom()
 
     '''
     Returns -1 if not at goal state (game not over)

@@ -10,21 +10,19 @@ from kingdom import Kingdom
 def buy_card(player, card, kingdom):
     assert player.num_buys > 0
     player.num_buys -= 1
+    if params.debug_mode >= 3:
+        print(player.name, "buying", card.name)
     if card.id != -1:
         assert player.coins >= card.cost
         player.coins -= card.cost
-
-        if params.debug_mode >= 3:
-            print(player.name, "buying", card.name)
-
         gain_card(player, card, kingdom)
 
 def gain_card(player, card, kingdom):
-    assert card.id > -1
     if params.debug_mode >= 3:
         print(player.name, "gaining", card.name)
-    kingdom.gain_card(card)
-    player.discard.append(card)
+    if card.id != -1:
+        kingdom.gain_card(card)
+        player.discard.append(card)
 
 # Prints the total sum of weights off each input feature
 def print_feature_weights(model_full):
@@ -78,6 +76,8 @@ def generate_kingdom():
         else:
             new_kingdom[i] = 0
 
+    new_kingdom[12] = 10
+
     return Kingdom(new_kingdom)
 
 def cards_to_string(cards):
@@ -92,13 +92,28 @@ def serialize_cards(cards):
 def cards_to_ids(cards):
     return [c.id for c in cards]
 
-def get_purchaseable_cards(num_coins, kingdom):
+def get_purchaseable_cards(player, num_coins, kingdom, is_gaining = False):
     cards_purchasable = []
+
+    if params.debug_mode >= 2:
+        if is_gaining:
+            print(player.name, "gaining with limit", num_coins)
+        else:
+            print(player.name, "has", num_coins, "coins")
+
+    # "skip" card
+    cards_purchasable.append(Card(-1))
 
     for c in kingdom.supply.keys():
         card = Card(c)
         if card.cost <= num_coins and kingdom.supply[c] > 0:
             cards_purchasable.append(card)
+
+    if params.debug_mode >= 3:
+        if is_gaining:
+            print(player.name, "gainable:", cards_to_string(cards_purchasable))
+        else:
+            print(player.name, "purchaseable:", cards_to_string(cards_purchasable))
 
     return cards_purchasable
 
