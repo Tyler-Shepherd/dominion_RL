@@ -20,6 +20,7 @@ class Card:
         self.f_action = 0
         self.f_attack = 0
         self.f_curse = 0
+        self.f_reaction = 0
 
         self.coin_value = 0
         self.victory_value = 0
@@ -133,7 +134,7 @@ class Card:
         assert self.f_action
 
         if params.debug_mode >= 2:
-            print("Playing", self.name)
+            print(player.name, "playing", self.name)
 
         # Trigger reactions if this is an Attack card
         opponent_unnaffected = player.opponent.attack_played() if self.f_attack else None

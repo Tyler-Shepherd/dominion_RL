@@ -12,7 +12,7 @@ if __name__ == '__main__':
     agent = Dominion_Agent("")
     base = RL_base(agent)
 
-    model_file = "./training/results/654249280_val_99.pth.tar"
+    model_file = "./training/results/9-3-19/768224832_val_6.pth.tar"
     agent.load_model(model_file)
 
     dominion_utils.print_feature_weights(agent.model)

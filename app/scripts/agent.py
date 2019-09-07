@@ -77,8 +77,6 @@ class Agent(Player):
 
         # max_action = dominion_utils.force_buy(16, self, max_action)
 
-        print("Agent buying", max_action.name)
-
         dominion_utils.buy_card(self, max_action, self.kingdom)
 
         return max_action

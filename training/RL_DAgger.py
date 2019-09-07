@@ -226,9 +226,6 @@ class RL_DAgger():
         dominion_utils.buy_card(self.agent, a, self.kingdom)
         self.running_states += 1
 
-        if params.debug_mode >= 2:
-            print("Agent buying", a.name)
-
     '''
     Plays one game using current agent against opponent on kingdom, and prints output to test_output_full_file
     '''

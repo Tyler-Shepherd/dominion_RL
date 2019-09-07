@@ -30,8 +30,8 @@ class Dominion_Agent(Player):
         self.running_loss = 0
         self.loss_output_file = loss_output_file
 
-        # self.loss_fn = torch.nn.MSELoss(size_average=False)  # using mean squared error
-        self.loss_fn = torch.nn.SmoothL1Loss(size_average=False)  # Huber loss
+        self.loss_fn = torch.nn.MSELoss(size_average=False)  # using mean squared error
+        # self.loss_fn = torch.nn.SmoothL1Loss(size_average=False)  # Huber loss
 
     '''
     Returns all possible cards purchaseable
@@ -40,7 +40,7 @@ class Dominion_Agent(Player):
         self.play_treasures()
         coins = self.coins
         if params.debug_mode >= 2:
-            print("Agent has", coins, "coins")
+            print(self.name, "has", coins, "coins")
 
         cards_purchasable = []
 
@@ -111,9 +111,6 @@ class Dominion_Agent(Player):
 
             purchases.append((self.coins, max_action))
             dominion_utils.buy_card(self, max_action, self.kingdom)
-
-            if params.debug_mode >= 2:
-                print("Agent buying", max_action.name)
 
         return purchases
 

@@ -39,7 +39,7 @@ def buy():
     data = json.loads(request.data.decode())
     card_to_buy = Card(data['to_buy'])
 
-    app.logger.info("Buying " + card_to_buy.name)
+    app.logger.info(person.name + " buying " + card_to_buy.name)
 
     dominion_utils.buy_card(person, card_to_buy, kingdom)
 
@@ -55,7 +55,7 @@ def gain():
     data = json.loads(request.data.decode())
     card_to_gain = Card(data['to_gain'])
 
-    app.logger.info("Gaining " + card_to_gain.name)
+    app.logger.info(person.name + " gaining " + card_to_gain.name)
 
     dominion_utils.gain_card(person, card_to_gain, kingdom)
 
@@ -91,7 +91,7 @@ def play_card():
     card_to_play = next((x for x in person.hand if x.id == data['to_play']), None)
     assert card_to_play is not None
 
-    app.logger.info("Playing " + card_to_play.name)
+    app.logger.info(person.name + " playing " + card_to_play.name)
 
     person.hand.remove(card_to_play)
     person.in_play.append(card_to_play)

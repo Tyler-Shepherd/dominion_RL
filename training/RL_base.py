@@ -236,9 +236,6 @@ class RL_base():
         dominion_utils.buy_card(self.agent, a, self.kingdom)
         self.running_states += 1
 
-        if params.debug_mode >= 2:
-            print("Agent buying", a.name)
-
         new_reward = self.reward(a)
         self.current_experience.append(new_reward)
 
