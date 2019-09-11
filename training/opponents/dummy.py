@@ -19,16 +19,7 @@ class Dummy_Opponent(Player):
         dominion_utils.buy_card(self, bought_card, self.kingdom)
 
     def action_phase(self):
-        action_cards = [card for card in self.hand if card.f_action]
-
-        while self.num_actions > 0 and len(action_cards) > 0:
-            # Currently just plays in order
-            card_to_play = action_cards.pop()
-            self.hand.remove(card_to_play)
-            self.in_play.append(card_to_play)
-            self.num_actions -= 1
-            card_to_play.play(self)
-            action_cards = [card for card in self.hand if card.f_action]
+        dominion_utils.generic_action_phase(self)
 
     def gain_card_up_to(self, limit):
         gainable = dominion_utils.get_purchaseable_cards(self, limit, self.kingdom, True)

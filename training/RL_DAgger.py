@@ -61,12 +61,14 @@ class RL_DAgger():
         assert current_state > 0
         # 83 is the maximum point value if you get all provinces, all duchies, and all estates
         # -10 is lowest possible score if you have all curses and no victory
-        reward_val = 1 if self.agent.num_victory_points() > self.opponent.num_victory_points() else ((self.agent.num_victory_points() + 10) / (83 + 10))
+        # reward_val = 1 if self.agent.num_victory_points() > self.opponent.num_victory_points() else ((self.agent.num_victory_points() + 10) / (83 + 10))
 
-        if not 0 <= reward_val <= 1:
-            print(reward_val)
-            print(self.agent.num_victory_points())
-        assert 0 <= reward_val <= 1
+        reward_val = 100 if self.agent.num_victory_points() > self.opponent.num_victory_points() else self.agent.num_victory_points()
+
+        # if not 0 <= reward_val <= 1:
+        #     print(reward_val)
+        #     print(self.agent.num_victory_points())
+        # assert 0 <= reward_val <= 1
 
         if params.debug_mode >= 3:
             print("Reward", reward_val)
@@ -239,7 +241,7 @@ class RL_DAgger():
         # Reset game
         self.reset_environment()
 
-        test_output_full_file.write(str(kingdom.supply) + '\n')
+        test_output_full_file.write(str(kingdom.supply) + " " + opponent.name + '\n')
 
         # 1 if agent turn
         # -1 if opponent turn
@@ -269,22 +271,10 @@ class RL_DAgger():
 
         player_vp = self.agent.num_victory_points()
         opp_vp = self.opponent.num_victory_points()
+        player_won = dominion_utils.did_player_win(player_vp, opp_vp, whose_turn, self.kingdom)
 
-        test_output_full_file.write('Player VP\t' + str(player_vp) + '\tOpponent VP\t' + str(opp_vp) + '\tDifference\t' + str(player_vp - opp_vp) + '\n')
+        test_output_full_file.write('Player VP\t' + str(player_vp) + '\tOpponent VP\t' + str(opp_vp) + '\tDifference\t' + str(player_vp - opp_vp) + '\tWinner\t' + str(player_won) + '\n')
         test_output_full_file.write('--------------------------------------------\n')
         test_output_full_file.flush()
-
-        player_won = player_vp > opp_vp
-        if player_vp == opp_vp:
-            if whose_turn == self.kingdom.starting_player:
-                # Tie game, both players had equal number of turns
-                player_won = 0
-            else:
-                if self.kingdom.starting_player == 1:
-                    # Agent had an extra turn, so loses
-                    player_won = 0
-                else:
-                    # Opponent had extra turn, so agent wins
-                    player_won = 1
 
         return player_won, self.kingdom.turn_num, player_vp, opp_vp

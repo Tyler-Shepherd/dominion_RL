@@ -1,11 +1,11 @@
 import datetime
 
-debug_mode = 3
+debug_mode = 1
 max_card_id = 16
 
-checkpoint_filename = "../training/results/376186129_val_init.pth.tar"
+checkpoint_filename = "../training/results/9-8-19/873638841_val_6.pth.tar"
 
-num_train_kingdoms = 80
+num_train_kingdoms = 1
 num_test_kingdoms = 20
 num_val_kingdoms = 20
 
@@ -25,7 +25,7 @@ discount_factor = 0.95
 # Boltzmann Exploration Parameters
 tau_start = 1.0
 tau_end = 0.05
-tau_decay = 100000 # Smaller number is faster decay
+tau_decay = 2000000 # Smaller number is faster decay
 
 # Updates every x experience replay trainings
 update_target_network_every = 2
@@ -38,14 +38,13 @@ unusual_sample_factor = 0.4
 batch_size = 100
 
 D_in = 12 + (max_card_id + 2) + (max_card_id + 1) + (max_card_id + 1) + (max_card_id + 1) + 1 + (max_card_id + 1)
-# D_in = max_card_id + 1 + max_card_id + 2
-H = 32
+H = 128
+H2 = 128
 D_out = 1
 
-
 # DAgger
-num_dagger_iterations = 5 # num iterations on each kingdom/opponent pair
-num_dagger_samples = 6 # num games to play each iteration
+num_dagger_iterations = 10 # num iterations on each kingdom/opponent pair
+num_dagger_samples = 12 # num games to play each iteration
 
 
 
@@ -80,6 +79,7 @@ def print_params(parameters_file):
 
     parameters_file.write("D_in\t" + str(D_in) + '\n')
     parameters_file.write("H\t" + str(H) + '\n')
+    parameters_file.write("H2\t" + str(H2) + '\n')
     parameters_file.write("D_out\t" + str(D_out) + '\n')
 
     parameters_file.write("num_dagger_iterations\t" + str(num_dagger_iterations) + '\n')

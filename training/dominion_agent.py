@@ -17,9 +17,11 @@ class Dominion_Agent(Player):
         # Initialize learning model
         self.model = torch.nn.Sequential(
             torch.nn.Linear(params.D_in, params.H),
-            torch.nn.Tanh(),
-            torch.nn.Linear(params.H, params.D_out),
-            torch.nn.Tanh()
+            torch.nn.ReLU(),
+            torch.nn.Linear(params.H, params.H2),
+            torch.nn.ReLU(),
+            torch.nn.Linear(params.H2, params.D_out),
+            torch.nn.ReLU()
         )
 
         self.target_model = copy.deepcopy(self.model)
@@ -105,16 +107,7 @@ class Dominion_Agent(Player):
         return purchases
 
     def action_phase(self):
-        action_cards = [card for card in self.hand if card.f_action]
-
-        while self.num_actions > 0 and len(action_cards) > 0:
-            # Currently just plays in order
-            card_to_play = action_cards.pop()
-            self.hand.remove(card_to_play)
-            self.in_play.append(card_to_play)
-            self.num_actions -= 1
-            card_to_play.play(self)
-            action_cards = [card for card in self.hand if card.f_action]
+        dominion_utils.generic_action_phase(self)
 
     def save_model(self, checkpoint_filename):
         torch.save(self.model.state_dict(), checkpoint_filename)

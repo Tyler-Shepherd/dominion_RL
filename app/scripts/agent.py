@@ -23,8 +23,11 @@ class Agent(Player):
         # Initialize learning model
         self.model = torch.nn.Sequential(
             torch.nn.Linear(params.D_in, params.H),
-            torch.nn.Sigmoid(),
-            torch.nn.Linear(params.H, params.D_out)
+            torch.nn.ReLU(),
+            torch.nn.Linear(params.H, params.H2),
+            torch.nn.ReLU(),
+            torch.nn.Linear(params.H2, params.D_out),
+            torch.nn.ReLU()
         )
 
         checkpoint = torch.load(params.checkpoint_filename)
@@ -33,7 +36,6 @@ class Agent(Player):
 
     # Returns played card, or None if agent is ending action phase
     # Not really the full action phase, just next card to be played
-    # TODO return follow up
     def action_phase(self):
         action_cards = [card for card in self.hand if card.f_action]
         print("Agent hand action phase: ", dominion_utils.cards_to_string(self.hand))
@@ -74,7 +76,7 @@ class Agent(Player):
 
         assert max_action is not None
 
-        # max_action = dominion_utils.force_buy(16, self, max_action)
+        # max_action = dominion_utils.force_buy(9, self, max_action)
 
         dominion_utils.buy_card(self, max_action, self.kingdom)
 

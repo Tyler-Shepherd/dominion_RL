@@ -312,7 +312,7 @@ class RL_base():
         # Reset game
         self.reset_environment()
 
-        test_output_full_file.write(str(kingdom.supply) + '\n')
+        test_output_full_file.write(str(kingdom.supply) + " " + opponent.name + '\n')
 
         # 1 if agent turn
         # -1 if opponent turn
@@ -343,10 +343,6 @@ class RL_base():
         player_vp = self.agent.num_victory_points()
         opp_vp = self.opponent.num_victory_points()
 
-        test_output_full_file.write('Player VP\t' + str(player_vp) + '\tOpponent VP\t' + str(opp_vp) + '\tDifference\t' + str(player_vp - opp_vp) + '\n')
-        test_output_full_file.write('--------------------------------------------\n')
-        test_output_full_file.flush()
-
         player_won = player_vp > opp_vp
         if player_vp == opp_vp:
             if whose_turn == self.kingdom.starting_player:
@@ -359,5 +355,11 @@ class RL_base():
                 else:
                     # Opponent had extra turn, so agent wins
                     player_won = 1
+
+        test_output_full_file.write('Player VP\t' + str(player_vp) + '\tOpponent VP\t' + str(opp_vp) + '\tDifference\t' + str(player_vp - opp_vp) + '\tWinner\t' + str(player_won) + '\n')
+        test_output_full_file.write('--------------------------------------------\n')
+        test_output_full_file.flush()
+
+        assert 1 == 2 # should use dominion_utils.did_player_win
 
         return player_won, self.kingdom.turn_num, player_vp, opp_vp

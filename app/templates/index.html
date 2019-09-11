@@ -35,7 +35,12 @@
 
 
 
-<div ng-if="ctrl.gameOver">Game Over!</div>
+<div ng-if="ctrl.gameOver">
+    <div>Game Over!</div>
+    <div>Winner: {[ctrl.winner]}</div>
+    <div>Your VP: {[ctrl.person_vp]}</div>
+    <div>Opponent VP: {[ctrl.agent_vp]}</div>
+</div>
 <button ng-if="ctrl.gameNotStarted" ng-click="ctrl.startGame()">Start Game</button>
 
 <div ng-if="!ctrl.gameOver">

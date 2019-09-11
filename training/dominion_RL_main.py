@@ -20,7 +20,6 @@ def test_model(test_output_file, test_output_full_file, base, test_kingdoms, num
     num_total_turns = 0
     num_total_player_vp = 0
     num_total_opp_vp = 0
-    j = 0
 
     test_output_full_file.write("************** Test " + str(num_times_tested) + '\n')
 
@@ -29,21 +28,21 @@ def test_model(test_output_file, test_output_full_file, base, test_kingdoms, num
     else:
         print("---------------Test " + str(num_times_tested) + "----------------")
 
-    for test_kingdom in test_kingdoms:
-        # player_won, test_num_turns, player_vp, opp_vp = base.test_agent(Buy_Only_Treasure_Opponent(), test_kingdom, test_output_full_file)
-        player_won, test_num_turns, player_vp, opp_vp = base.test_agent(Dummy_Opponent(), test_kingdom, test_output_full_file)
+    opponents = [Dummy_Opponent(), Buy_Only_Treasure_Opponent()]
 
-        num_won += player_won
-        num_total_turns += test_num_turns
-        num_total_player_vp += player_vp
-        num_total_opp_vp += opp_vp
+    for opponent in opponents:
+        for test_kingdom in test_kingdoms:
+            player_won, test_num_turns, player_vp, opp_vp = base.test_agent(opponent, test_kingdom, test_output_full_file)
 
-        j += 1
+            num_won += player_won
+            num_total_turns += test_num_turns
+            num_total_player_vp += player_vp
+            num_total_opp_vp += opp_vp
 
-    win_percent = num_won / len(test_kingdoms)
-    avg_num_turns = num_total_turns / len(test_kingdoms)
-    avg_player_vp = num_total_player_vp / len(test_kingdoms)
-    avg_opp_vp = num_total_opp_vp / len(test_kingdoms)
+    win_percent = num_won / (len(test_kingdoms) * len(opponents))
+    avg_num_turns = num_total_turns / (len(test_kingdoms) * len(opponents))
+    avg_player_vp = num_total_player_vp / (len(test_kingdoms) * len(opponents))
+    avg_opp_vp = num_total_opp_vp / (len(test_kingdoms) * len(opponents))
 
     print("Agent won", win_percent, ", took average of", avg_num_turns, "turns with avg VP score of", avg_player_vp, "and opp VP score of", avg_opp_vp)
     test_output_file.write(str(num_times_tested) + "\t" + str(num_won) + '\t' + str(win_percent) + '\t'
@@ -103,7 +102,7 @@ if __name__ == '__main__':
     total_num_turns = 0
 
     # Print header
-    header = "Kingdom\tLearning Rate\tTau\tPlayer Won\tOpponent VP\tPlayer VP\tRuntime"
+    header = "Kingdom\tOpponent\tLearning Rate\tTau\tPlayer Won\tOpponent VP\tPlayer VP\tRuntime"
     print(header)
     output_file.write(header+'\n')
 
@@ -144,8 +143,10 @@ if __name__ == '__main__':
         random.shuffle(train_kingdoms)
 
         for kingdom in train_kingdoms:
-            # opponent = Buy_Only_Treasure_Opponent()
-            opponent = Dummy_Opponent()
+            if random.random() < 0.2:
+                opponent = Buy_Only_Treasure_Opponent()
+            else:
+                opponent = Dummy_Opponent()
 
             # Run the agent on kingdom against opponent
             start = time.perf_counter()
@@ -160,7 +161,7 @@ if __name__ == '__main__':
             player_vp = agent.num_victory_points()
             opp_vp = opponent.num_victory_points()
 
-            result_text = "%s\t%f\t%f\t%d\t%d\t%d\t%f" % (str(kingdom), base.learning_rate, base.tau, player_vp > opp_vp, opp_vp, player_vp, end - start)
+            result_text = "%s\t%s\t%f\t%f\t%d\t%d\t%d\t%f" % (str(kingdom), opponent.name, base.learning_rate, base.tau, player_vp > opp_vp, opp_vp, player_vp, end - start)
             if params.debug_mode >= 1:
                 print(i, result_text)
             output_file.write(result_text + '\n')
@@ -172,13 +173,23 @@ if __name__ == '__main__':
         if epoch % params.test_on_val_every_epochs == 0:
             agent.save_model("training/results/" + str(model_id) + "_val_" + str(num_times_tested) + '.pth.tar')
             win_percent, avg_vp_diff = test_model(val_file, val_full_file, base, val_kingdoms, num_times_tested, True)
-            # val_results.append(avg_vp_diff)
-            val_results.append(win_percent)
+            val_results.append((win_percent,avg_vp_diff))
             num_times_tested += 1
 
     print('----------------------Training Done------------------------------')
     print("Validation results:", val_results)
-    best_model = np.argmax(val_results)
+    best_model = -1
+    best_win_percent = -1
+    best_vp_diff = -99999
+    i = 0
+    for (win_percent, avg_vp_diff) in val_results:
+        if (win_percent > best_win_percent) or (win_percent == best_win_percent and avg_vp_diff > best_vp_diff):
+            best_model = i
+            best_win_percent = win_percent
+            best_vp_diff = avg_vp_diff
+        i += 1
+
+    assert best_model != -1
     print("Best model:", best_model)
 
     # load and test best model 10x

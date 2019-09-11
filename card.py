@@ -22,6 +22,8 @@ class Card:
         self.f_curse = 0
         self.f_reaction = 0
 
+        self.gives_actions = 0
+
         self.coin_value = 0
         self.victory_value = 0
 
@@ -81,6 +83,7 @@ class Card:
         elif id == 8:
             # Village
             self.f_action = 1
+            self.gives_actions = 1
             self.cost = 3
             self.name = "Village"
         elif id == 9:
@@ -113,6 +116,7 @@ class Card:
         elif id == 14:
             # Market
             self.f_action = 1
+            self.gives_actions = 1
             self.cost = 5
             self.name = "Market"
         elif id == 15:

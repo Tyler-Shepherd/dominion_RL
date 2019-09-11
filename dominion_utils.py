@@ -71,12 +71,12 @@ def generate_kingdom():
 
     # TODO eventually need to randomly select 10 cards for the kingdom
     for i in range(7, params.max_card_id+1):
-        if random.random() < 0.2:
+        if random.random() < 1:
             new_kingdom[i] = 10
         else:
             new_kingdom[i] = 0
 
-    new_kingdom[12] = 10
+    # new_kingdom[9] = 1
 
     return Kingdom(new_kingdom)
 
@@ -140,7 +140,7 @@ def state_features(player, kingdom, a):
     f.append(2 * int(a.f_attack) - 1)
     f.append(2 * int(a.f_curse) - 1)
     f.append(2 * int(a.f_reaction) - 1)
-    f.append(kingdom.turn_num / 30)
+    f.append(kingdom.turn_num * 10 / 30)
 
     # player vp total
     f.append(player.num_victory_points() / 53)
@@ -205,6 +205,7 @@ def state_features(player, kingdom, a):
     return Variable(torch.from_numpy(np.array(f)).float())
 
 def force_buy(card_id, player, old_choice):
+    print(player.name, "FORCING BUY", Card(card_id).name)
     if player.coins >= Card(card_id).cost and player.kingdom.supply[card_id] > 0:
         return Card(card_id)
     return old_choice
@@ -244,3 +245,40 @@ def cards_equivalent(cards1, cards2):
         num_cards_2[c.id] += 1
 
     return num_cards_1 == num_cards_2
+
+def generic_action_phase(player):
+    action_cards = [card for card in player.hand if card.f_action]
+    if params.debug_mode >= 3:
+        print(player.name, "playable action cards", cards_to_string(action_cards))
+
+    while player.num_actions > 0 and len(action_cards) > 0:
+        card_to_play = next((card for card in action_cards if card.gives_actions), None)
+        if card_to_play == None:
+            card_to_play = max(action_cards, key=lambda card: card.cost)
+
+        assert card_to_play is not None
+
+        player.hand.remove(card_to_play)
+        player.in_play.append(card_to_play)
+        player.num_actions -= 1
+        card_to_play.play(player)
+        action_cards = [card for card in player.hand if card.f_action]
+
+# Returns 0 if player lost
+# Returns 0.5 if player tied
+# Returns 1 if player won
+def did_player_win(player_vp, opp_vp, whose_turn, kingdom):
+    player_won = player_vp > opp_vp
+    if player_vp == opp_vp:
+        if whose_turn == kingdom.starting_player:
+            # Tie game, both players had equal number of turns
+            player_won = 0.5
+        else:
+            if kingdom.starting_player == 1:
+                # Agent had an extra turn, so loses
+                player_won = 0
+            else:
+                # Opponent had extra turn, so agent wins
+                player_won = 1
+
+    return player_won

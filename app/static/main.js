@@ -34,6 +34,10 @@ app.controller('DominionAIController', ['$log', '$http',
   ctrl.gameNotStarted = true;
   ctrl.gameOver = false;
 
+  ctrl.winner = "";
+  ctrl.person_vp = 0;
+  ctrl.agent_vp = 0;
+
   // play_phase = -2: agent buy phase
   // play_phase = -1: agent action phase
   // play_phase = 0: nobody's turn
@@ -97,6 +101,9 @@ app.controller('DominionAIController', ['$log', '$http',
 
         if(response.data.game_over) {
             ctrl.gameOver = true;
+            ctrl.person_vp = response.data.person_vp;
+            ctrl.agent_vp = response.data.agent_vp;
+            ctrl.winner = response.data.winner;
             ctrl.play_phase = 0;
         }
         else {
@@ -191,6 +198,9 @@ app.controller('DominionAIController', ['$log', '$http',
 
                     if(response.data.game_over) {
                         ctrl.gameOver = true;
+                        ctrl.person_vp = response.data.person_vp;
+                        ctrl.agent_vp = response.data.agent_vp;
+                        ctrl.winner = response.data.winner;
                         ctrl.play_phase = 0;
                     } else {
                         ctrl.play_phase = 1;
