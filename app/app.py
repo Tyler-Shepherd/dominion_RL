@@ -96,6 +96,7 @@ def play_card():
     action_cards_data = dominion_utils.serialize_cards(action_cards)
 
     data = {"hand": dominion_utils.serialize_cards(person.hand), "action_cards": action_cards_data,
+            "in_play": dominion_utils.serialize_cards(person.in_play),
             "kingdom": dominion_utils.kingdom_to_string(kingdom), "num_actions": person.num_actions,
             "num_buys": person.num_buys}
     data["follow_up"] = follow_up_action.serialize() if follow_up_action else None
@@ -125,6 +126,7 @@ def end_turn():
         kingdom.next_turn()
 
     data = {"turn": kingdom.turn_num, "hand": dominion_utils.serialize_cards(person.hand),
+            "in_play": dominion_utils.serialize_cards(agent.in_play),
             "kingdom": dominion_utils.kingdom_to_string(kingdom), "game_over": game_over,
             "num_buys": agent.num_buys, "num_actions": agent.num_actions, "person_vp": person.num_victory_points(),
             "agent_vp": agent.num_victory_points(), "winner": winner}
@@ -153,6 +155,7 @@ def end_agent_turn():
         kingdom.next_turn()
 
     data = {"turn": kingdom.turn_num, "hand": dominion_utils.serialize_cards(person.hand),
+            "in_play": dominion_utils.serialize_cards(person.in_play),
             "kingdom": dominion_utils.kingdom_to_string(kingdom), "game_over": game_over,
             "num_buys": person.num_buys, "num_actions": person.num_actions, "person_vp": person.num_victory_points(),
             "agent_vp": agent.num_victory_points(), "winner": winner}
@@ -167,6 +170,7 @@ def get_agent_action():
     played_card, follow_up = agent.action_phase()
 
     data = {"kingdom": dominion_utils.kingdom_to_string(kingdom),
+            "in_play": dominion_utils.serialize_cards(agent.in_play),
             "end_action_phase": played_card is None,
             "played_card": played_card.name if played_card else "",
             "num_buys": agent.num_buys, "num_actions": agent.num_actions,
@@ -183,6 +187,7 @@ def get_agent_buy():
     bought_card = agent.buy_phase()
 
     data = {"kingdom": dominion_utils.kingdom_to_string(kingdom),
+            "in_play": dominion_utils.serialize_cards(agent.in_play),
             "end_buy_phase": bought_card is None,
             "bought_card": bought_card.name if bought_card else "",
             "num_buys": agent.num_buys}
@@ -224,7 +229,9 @@ def get_purchaseable_cards():
     purchaseable_cards = dominion_utils.get_purchaseable_cards(person, person.coins, kingdom)
     purchaseable_cards_data = dominion_utils.serialize_cards(purchaseable_cards)
 
-    resp = Response(json.dumps(purchaseable_cards_data), status=200, mimetype='application/json')
+    data = {"purchaseable": purchaseable_cards_data, "in_play": dominion_utils.serialize_cards(person.in_play),
+            "hand": dominion_utils.serialize_cards(person.hand)}
+    resp = Response(json.dumps(data), status=200, mimetype='application/json')
     return resp
 
 @app.route('/get_action_cards', methods=['GET'])

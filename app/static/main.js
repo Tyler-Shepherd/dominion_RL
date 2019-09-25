@@ -23,6 +23,7 @@ app.controller('DominionAIController', ['$log', '$http',
   ctrl.person_hand = "";
   ctrl.person_hand_serialized = [];
   ctrl.kingdom = "";
+  ctrl.in_play = "";
 
   //num_actions and num_buys are just views of data from server, not set by client
   ctrl.action_cards = [];
@@ -59,7 +60,9 @@ app.controller('DominionAIController', ['$log', '$http',
         $http.get('/get_purchaseable_cards')
             .then(function(response) {
                 $log.log(response);
-                ctrl.purchaseable_cards = response.data;
+                ctrl.purchaseable_cards = response.data.purchaseable;
+                ctrl.in_play = cards_to_string(response.data.in_play);
+                ctrl.person_hand = cards_to_string(response.data.hand);
 
                 $log.log('Purchaseable:');
                 $log.log(ctrl.purchaseable_cards);
@@ -82,6 +85,7 @@ app.controller('DominionAIController', ['$log', '$http',
         ctrl.person_hand = cards_to_string(response.data.hand);
         ctrl.person_hand_serialized = response.data.hand;
         ctrl.num_buys = response.data.num_buys;
+        ctrl.in_play = cards_to_string(response.data.in_play);
 
         if (response.data.follow_up) {
             ctrl.follow_up = response.data.follow_up;
@@ -114,6 +118,7 @@ app.controller('DominionAIController', ['$log', '$http',
         ctrl.person_hand = cards_to_string(response.data.hand);
         ctrl.person_hand_serialized = response.data.hand;
         ctrl.kingdom = response.data.kingdom;
+        ctrl.in_play = cards_to_string(response.data.in_play);
 
         // Agent num_buys and num_actions
         ctrl.num_actions = response.data.num_actions;
@@ -148,7 +153,9 @@ app.controller('DominionAIController', ['$log', '$http',
 
     $http.get('/get_purchaseable_cards').then(function(response) {
         $log.log(response);
-        ctrl.purchaseable_cards = response.data;
+        ctrl.purchaseable_cards = response.data.purchaseable;
+        ctrl.in_play = cards_to_string(response.data.in_play);
+        ctrl.person_hand = cards_to_string(response.data.hand);
 
         $log.log('purchaseable:');
         $log.log(ctrl.purchaseable_cards);
@@ -175,6 +182,7 @@ app.controller('DominionAIController', ['$log', '$http',
             ctrl.num_actions = response.data.num_actions;
             ctrl.person_hand = cards_to_string(response.data.hand);
             ctrl.person_hand_serialized = response.data.hand;
+            ctrl.in_play = cards_to_string(response.data.in_play);
 
             if (response.data.follow_up) {
                 ctrl.follow_up = response.data.follow_up;
@@ -191,6 +199,7 @@ app.controller('DominionAIController', ['$log', '$http',
             $log.log(response);
 
             ctrl.kingdom = response.data.kingdom;
+            ctrl.in_play = cards_to_string(response.data.in_play);
 
             if (response.data.end_buy_phase) {
                 $http.get('/end_agent_turn').then(function(response) {
@@ -216,6 +225,7 @@ app.controller('DominionAIController', ['$log', '$http',
                     ctrl.kingdom = response.data.kingdom;
                     ctrl.num_buys = response.data.num_buys;
                     ctrl.num_actions = response.data.num_actions;
+                    ctrl.in_play = cards_to_string(response.data.in_play);
 
                     ctrl.play_log = "Opponent ended turn - your turn.";
                 });
