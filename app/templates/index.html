@@ -13,6 +13,16 @@
 <div>
     <h1>Turn <span ng-bind="ctrl.turn_num"></span></h1>
 
+    <div>Opponent VP:
+        <span ng-bind="ctrl.agent_vp"></span>
+    </div>
+
+    <div>Your VP:
+        <span ng-bind="ctrl.person_vp"></span>
+    </div>
+
+    <br>
+
     <div>Kingdom: <span ng-bind="ctrl.kingdom"></span></div>
 </div>
 
@@ -44,11 +54,15 @@
 <button ng-if="ctrl.gameNotStarted" ng-click="ctrl.startGame()">Start Game</button>
 
 <div ng-if="!ctrl.gameOver">
+    <h4>Num Actions: <span ng-bind="ctrl.num_actions"></span></h4>
+    <h4>Num Coins: <span ng-bind="ctrl.num_coins"></span></h4>
+    <h4>Num Buys: <span ng-bind="ctrl.num_buys"></span></h4>
+
+    <div>In Play:
+        <span ng-bind="ctrl.in_play"></span>
+    </div>
+
     <div ng-if="ctrl.play_phase === -1">
-        <h3>Num Actions: <span ng-bind="ctrl.num_actions"></span></h3>
-
-        <br>
-
         <div ng-if="ctrl.follow_up_active">
             <span ng-if="ctrl.follow_up.type == 2">
                 Discard down to {[ctrl.follow_up.new_handsize]}:
@@ -64,16 +78,10 @@
     </div>
 
     <div ng-if="ctrl.play_phase === -2">
-        <h3>Num Buys: <span ng-bind="ctrl.num_buys"></span></h3>
-
-        <br>
-
         <button ng-click="ctrl.agentNext()">Next</button>
     </div>
 
     <div ng-if="ctrl.play_phase === 1">
-        <h3>Num Actions: <span ng-bind="ctrl.num_actions"></span></h3>
-
         <div ng-if="ctrl.follow_up_active">
             <span ng-if="ctrl.follow_up.type == 1">
                 Gain card costing up to {[ctrl.follow_up.gain_card_limit]}:
@@ -96,8 +104,6 @@
     </div>
 
     <div ng-if="ctrl.play_phase === 2">
-        <h3>Num Buys: <span ng-bind="ctrl.num_buys"></span></h3>
-
         <div ng-if="ctrl.num_buys > 0">
             Purchaseable:
             <span ng-repeat="card in ctrl.purchaseable_cards" >
@@ -113,8 +119,8 @@
     <br>
     <br>
 
-    <div>In Play:
-        <span ng-bind="ctrl.in_play"></span>
+    <div>Num Cards in Your Deck:
+        <span ng-bind="ctrl.num_cards_in_deck"></span>
     </div>
 
     <div>Your Hand:

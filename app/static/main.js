@@ -27,10 +27,11 @@ app.controller('DominionAIController', ['$log', '$http',
 
   //num_actions and num_buys are just views of data from server, not set by client
   ctrl.action_cards = [];
-  ctrl.num_actions = 1;
+  ctrl.num_actions = 0;
 
   ctrl.purchaseable_cards = [];
-  ctrl.num_buys = 1;
+  ctrl.num_buys = 0;
+  ctrl.num_coins = 0;
 
   ctrl.gameNotStarted = true;
   ctrl.gameOver = false;
@@ -49,6 +50,8 @@ app.controller('DominionAIController', ['$log', '$http',
   ctrl.follow_up = {};
   ctrl.follow_up_active = false;
 
+  ctrl.num_cards_in_deck = 10;
+
   ctrl.buyCard = function(card_to_buy) {
     $log.log("Buying " + card_to_buy);
 
@@ -56,6 +59,7 @@ app.controller('DominionAIController', ['$log', '$http',
       .then(function(response) {
         $log.log(response);
         ctrl.num_buys = response.data.num_buys;
+        ctrl.person_vp = response.data.person_vp;
         ctrl.kingdom = response.data.kingdom;
         $http.get('/get_purchaseable_cards')
             .then(function(response) {
@@ -63,6 +67,7 @@ app.controller('DominionAIController', ['$log', '$http',
                 ctrl.purchaseable_cards = response.data.purchaseable;
                 ctrl.in_play = cards_to_string(response.data.in_play);
                 ctrl.person_hand = cards_to_string(response.data.hand);
+                ctrl.num_coins = response.data.num_coins;
 
                 $log.log('Purchaseable:');
                 $log.log(ctrl.purchaseable_cards);
@@ -86,6 +91,10 @@ app.controller('DominionAIController', ['$log', '$http',
         ctrl.person_hand_serialized = response.data.hand;
         ctrl.num_buys = response.data.num_buys;
         ctrl.in_play = cards_to_string(response.data.in_play);
+        ctrl.num_cards_in_deck = response.data.num_cards_in_deck;
+        ctrl.num_coins = response.data.num_coins;
+        ctrl.person_vp = response.data.person_vp;
+        ctrl.agent_vp = response.data.agent_vp;
 
         if (response.data.follow_up) {
             ctrl.follow_up = response.data.follow_up;
@@ -119,6 +128,7 @@ app.controller('DominionAIController', ['$log', '$http',
         ctrl.person_hand_serialized = response.data.hand;
         ctrl.kingdom = response.data.kingdom;
         ctrl.in_play = cards_to_string(response.data.in_play);
+        ctrl.num_cards_in_deck = response.data.num_cards_in_deck;
 
         // Agent num_buys and num_actions
         ctrl.num_actions = response.data.num_actions;
@@ -139,23 +149,26 @@ app.controller('DominionAIController', ['$log', '$http',
         ctrl.person_hand = cards_to_string(response.data.hand);
         ctrl.person_hand_serialized = response.data.hand;
         ctrl.kingdom = response.data.kingdom;
+        ctrl.num_cards_in_deck = 5;
         $http.get('/get_action_cards').then(function(response) {
             $log.log(response);
             ctrl.action_cards = response.data;
             ctrl.num_actions = 1;
             ctrl.num_buys = 1;
+            ctrl.num_coins = 0;
         });
     });
   };
 
   ctrl.endActionPhase = function() {
-    ctrl.play_phase = 2;
-
     $http.get('/get_purchaseable_cards').then(function(response) {
+        ctrl.play_phase = 2;
+
         $log.log(response);
         ctrl.purchaseable_cards = response.data.purchaseable;
         ctrl.in_play = cards_to_string(response.data.in_play);
         ctrl.person_hand = cards_to_string(response.data.hand);
+        ctrl.num_coins = response.data.num_coins;
 
         $log.log('purchaseable:');
         $log.log(ctrl.purchaseable_cards);
@@ -183,6 +196,9 @@ app.controller('DominionAIController', ['$log', '$http',
             ctrl.person_hand = cards_to_string(response.data.hand);
             ctrl.person_hand_serialized = response.data.hand;
             ctrl.in_play = cards_to_string(response.data.in_play);
+            ctrl.num_coins = response.data.num_coins;
+            ctrl.person_vp = response.data.person_vp;
+            ctrl.agent_vp = response.data.agent_vp;
 
             if (response.data.follow_up) {
                 ctrl.follow_up = response.data.follow_up;
@@ -200,6 +216,9 @@ app.controller('DominionAIController', ['$log', '$http',
 
             ctrl.kingdom = response.data.kingdom;
             ctrl.in_play = cards_to_string(response.data.in_play);
+            ctrl.num_coins = response.data.num_coins;
+            ctrl.person_vp = response.data.person_vp;
+            ctrl.agent_vp = response.data.agent_vp;
 
             if (response.data.end_buy_phase) {
                 $http.get('/end_agent_turn').then(function(response) {
@@ -207,13 +226,12 @@ app.controller('DominionAIController', ['$log', '$http',
 
                     if(response.data.game_over) {
                         ctrl.gameOver = true;
-                        ctrl.person_vp = response.data.person_vp;
-                        ctrl.agent_vp = response.data.agent_vp;
                         ctrl.winner = response.data.winner;
                         ctrl.play_phase = 0;
                     } else {
-                        ctrl.play_phase = 1;
                         $http.get('/get_action_cards').then(function(response) {
+                            ctrl.play_phase = 1;
+
                             $log.log(response);
                             ctrl.action_cards = response.data;
                         });
@@ -244,6 +262,8 @@ app.controller('DominionAIController', ['$log', '$http',
       .then(function(response) {
         $log.log(response);
         ctrl.kingdom = response.data.kingdom;
+        ctrl.person_vp = response.data.person_vp;
+        ctrl.agent_vp = response.data.agent_vp;
 
         ctrl.follow_up.remaining -= 1;
         if (ctrl.follow_up.remaining == 0) {

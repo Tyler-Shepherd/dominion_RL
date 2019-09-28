@@ -42,7 +42,8 @@ def buy():
     dominion_utils.buy_card(person, card_to_buy, kingdom)
 
     data = {"turn": kingdom.turn_num, "hand": dominion_utils.serialize_cards(person.hand),
-            "kingdom": dominion_utils.kingdom_to_string(kingdom), "num_buys": person.num_buys}
+            "kingdom": dominion_utils.kingdom_to_string(kingdom), "num_buys": person.num_buys,
+            "person_vp": person.num_victory_points()}
     data = json.dumps(data)
     resp = Response(data, status=200, mimetype='application/json')
     return resp
@@ -58,7 +59,8 @@ def gain():
     dominion_utils.gain_card(person, card_to_gain, kingdom)
 
     data = {"turn": kingdom.turn_num, "hand": dominion_utils.serialize_cards(person.hand),
-            "kingdom": dominion_utils.kingdom_to_string(kingdom)}
+            "kingdom": dominion_utils.kingdom_to_string(kingdom), "person_vp": person.num_victory_points(),
+            "agent_vp": agent.num_victory_points()}
     data = json.dumps(data)
     resp = Response(data, status=200, mimetype='application/json')
     return resp
@@ -98,7 +100,8 @@ def play_card():
     data = {"hand": dominion_utils.serialize_cards(person.hand), "action_cards": action_cards_data,
             "in_play": dominion_utils.serialize_cards(person.in_play),
             "kingdom": dominion_utils.kingdom_to_string(kingdom), "num_actions": person.num_actions,
-            "num_buys": person.num_buys}
+            "num_buys": person.num_buys, "num_cards_in_deck": len(person.deck), "num_coins": person.coins,
+            "person_vp": person.num_victory_points(), "agent_vp": agent.num_victory_points()}
     data["follow_up"] = follow_up_action.serialize() if follow_up_action else None
 
     data = json.dumps(data)
@@ -129,7 +132,7 @@ def end_turn():
             "in_play": dominion_utils.serialize_cards(agent.in_play),
             "kingdom": dominion_utils.kingdom_to_string(kingdom), "game_over": game_over,
             "num_buys": agent.num_buys, "num_actions": agent.num_actions, "person_vp": person.num_victory_points(),
-            "agent_vp": agent.num_victory_points(), "winner": winner}
+            "agent_vp": agent.num_victory_points(), "winner": winner, "num_cards_in_deck": len(person.deck)}
     data = json.dumps(data)
     resp = Response(data, status=200, mimetype='application/json')
     return resp
@@ -174,7 +177,9 @@ def get_agent_action():
             "end_action_phase": played_card is None,
             "played_card": played_card.name if played_card else "",
             "num_buys": agent.num_buys, "num_actions": agent.num_actions,
-            "hand": dominion_utils.serialize_cards(person.hand)}
+            "hand": dominion_utils.serialize_cards(person.hand),
+            "num_coins": agent.coins, "person_vp": person.num_victory_points(),
+            "agent_vp": agent.num_victory_points()}
     data["follow_up"] = follow_up.serialize() if follow_up else None
     data = json.dumps(data)
     resp = Response(data, status=200, mimetype='application/json')
@@ -190,7 +195,7 @@ def get_agent_buy():
             "in_play": dominion_utils.serialize_cards(agent.in_play),
             "end_buy_phase": bought_card is None,
             "bought_card": bought_card.name if bought_card else "",
-            "num_buys": agent.num_buys}
+            "num_buys": agent.num_buys, "num_coins": agent.coins, "agent_vp": agent.num_victory_points()}
     data = json.dumps(data)
     resp = Response(data, status=200, mimetype='application/json')
     return resp
@@ -230,7 +235,7 @@ def get_purchaseable_cards():
     purchaseable_cards_data = dominion_utils.serialize_cards(purchaseable_cards)
 
     data = {"purchaseable": purchaseable_cards_data, "in_play": dominion_utils.serialize_cards(person.in_play),
-            "hand": dominion_utils.serialize_cards(person.hand)}
+            "hand": dominion_utils.serialize_cards(person.hand), "num_coins": person.coins}
     resp = Response(json.dumps(data), status=200, mimetype='application/json')
     return resp
 
