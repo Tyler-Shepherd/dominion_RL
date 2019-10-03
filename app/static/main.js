@@ -156,6 +156,8 @@ app.controller('DominionAIController', ['$log', '$http',
             ctrl.num_actions = 1;
             ctrl.num_buys = 1;
             ctrl.num_coins = 0;
+            ctrl.person_vp = 3;
+            ctrl.agent_vp = 3;
         });
     });
   };
