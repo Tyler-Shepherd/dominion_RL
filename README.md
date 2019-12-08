@@ -6,6 +6,7 @@ In /training, two different training algorithms are available. dominion_RL_main.
 In /app, an Angular Flask app is available to play against your trained agent.
 
 For those curious, the following papers address different methods of AIs for Dominion:
+
   "An AI for Dominion Based on Monte-Carlo Methods" - Jon Vegard Jansen and Robin Tollisen. https://pdfs.semanticscholar.org/28b6/ada13e948cfaee4af5138ee667d404eb01ac.pdf
   
   "Developing an agent for Dominion using modern AI-approaches" - Rasmus Bille Fynbo and Miguel A. Sicart for University of Copenhagen. (Paper doesn't seem available anymore)
